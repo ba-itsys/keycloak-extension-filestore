@@ -5,3 +5,4 @@ name: test-group
 parentId: null
 realmId: master
 updated: false
+description: Fooobar

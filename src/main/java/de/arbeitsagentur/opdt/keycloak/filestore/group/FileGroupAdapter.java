@@ -45,6 +45,16 @@ public abstract class FileGroupAdapter extends AbstractGroupModel<FileGroupEntit
     }
 
     @Override
+    public String getDescription() {
+        return entity.getDescription();
+    }
+
+    @Override
+    public void setDescription(String description) {
+        entity.setDescription(description);
+    }
+
+    @Override
     public void setSingleAttribute(String name, String value) {
         entity.setAttribute(name, Collections.singletonList(value));
     }

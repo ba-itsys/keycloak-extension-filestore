@@ -34,6 +34,7 @@ public class FileGroupEntity implements AbstractEntity, UpdatableEntity {
     private String parentId;
     private String realmId;
     private GroupModel.Type type;
+    private String description;
     private List<String> grantedRoles = new ArrayList<>();
 
     public String getId() {
@@ -138,5 +139,13 @@ public class FileGroupEntity implements AbstractEntity, UpdatableEntity {
 
     public void setType(GroupModel.Type type) {
         this.type = type;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

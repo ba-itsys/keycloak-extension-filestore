@@ -21,11 +21,14 @@ import static de.arbeitsagentur.opdt.keycloak.filestore.common.AbstractFileProvi
 import static de.arbeitsagentur.opdt.keycloak.filestore.common.AbstractFileProviderFactory.MapProviderObjectType.CLIENT_SCOPE_BEFORE_REMOVE;
 import static org.keycloak.common.util.StackUtil.getShortStackTrace;
 
-import java.util.Comparator;
-import java.util.Objects;
+import java.util.*;
+
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import de.arbeitsagentur.opdt.keycloak.filestore.group.FileGroupEntity;
+import de.arbeitsagentur.opdt.keycloak.filestore.group.FileGroupStore;
 import org.jboss.logging.Logger;
 import org.keycloak.models.*;
 import org.keycloak.models.utils.KeycloakModelUtils;
@@ -132,4 +135,52 @@ public class FileClientScopeProvider implements ClientScopeProvider {
 
     @Override
     public void close() {}
+
+    @Override
+    public Stream<ClientScopeModel> getClientScopesByProtocol(RealmModel realm, String protocol) {
+        if (protocol == null) {
+            return null;
+        }
+
+        LOG.tracef("getClientScopesByProtocol(%s, %s)%s", realm, protocol, getShortStackTrace());
+        return FileClientScopeStore.readAll().stream()
+                .filter(clientScope -> Objects.equals(clientScope.getRealmId(), realm.getId()))
+                .filter(clientScope -> Objects.equals(clientScope.getProtocol(), protocol))
+                .map(clientScope -> entityToAdapterFunc(realm).apply(clientScope));
+    }
+
+    @Override
+    public Stream<ClientScopeModel> getClientScopesByAttributes(
+            RealmModel realm, Map<String, String> searchMap, boolean useOr) {
+        if (searchMap == null || searchMap.isEmpty()) {
+            return Stream.empty();
+        }
+
+        LOG.tracef("getClientScopesByAttributes(%s, %s, %s)%s", realm, searchMap, useOr, getShortStackTrace());
+        List<ClientScopeModel> result = new ArrayList<>();
+        List<FileClientScopeEntity> clientScopes = FileClientScopeStore.readAll().stream()
+                .filter(clientScope -> Objects.equals(clientScope.getRealmId(), realm.getId())).toList();
+
+        for (FileClientScopeEntity clientScope : clientScopes) {
+            Map<String, List<String>> attrs = clientScope.getMultivaluedAttributes();
+            if (attrs == null || attrs.isEmpty()) {
+                continue;
+            }
+
+            boolean matches;
+            if (useOr) {
+                matches = searchMap.entrySet().stream()
+                        .anyMatch(e -> attrs.containsKey(e.getKey()) && attrs.get(e.getKey()).contains(e.getValue()));
+            } else {
+                matches = searchMap.entrySet().stream()
+                        .allMatch(e -> attrs.containsKey(e.getKey()) && attrs.get(e.getKey()).contains(e.getValue()));
+            }
+
+            if (matches) {
+                result.add(entityToAdapterFunc(realm).apply(clientScope));
+            }
+        }
+
+        return result.stream();
+    }
 }

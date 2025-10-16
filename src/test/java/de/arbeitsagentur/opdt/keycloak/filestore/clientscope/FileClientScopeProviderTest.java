@@ -20,6 +20,8 @@ package de.arbeitsagentur.opdt.keycloak.filestore.clientscope;
 import static org.assertj.core.api.Assertions.*;
 
 import de.arbeitsagentur.opdt.keycloak.filestore.KeycloakModelTest;
+
+import java.util.Map;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -158,6 +160,63 @@ class FileClientScopeProviderTest extends KeycloakModelTest {
             // Assert
             var actual = clientScopes.getClientScopesStream(realm);
             assertThat(actual).isEmpty();
+        });
+    }
+
+    @Test
+    void whenGetClientScopesByProtocol_givenClientScopes_thenReturnStream() {
+        withRealmAndProvider(REALM_ID, KeycloakSession::clientScopes, (cs, realm) -> {
+            // Arrange
+            cs.addClientScope(realm, "Sahara").setProtocol("openid-connect");
+            cs.addClientScope(realm, "Kalahari").setProtocol("openid-connect");
+            cs.addClientScope(realm, "Gobi").setProtocol("saml");
+            // Act
+            Stream<ClientScopeModel> actual = cs.getClientScopesByProtocol(realm, "openid-connect");
+            // Assert
+            assertThat(actual)
+                    .hasSize(2)
+                    .map(ClientScopeModel::getName)
+                    .containsExactlyInAnyOrder("Sahara", "Kalahari");
+        });
+    }
+
+    @Test
+    void whenGetClientScopesByAttributes_givenClientScopes_thenReturnStream() {
+        withRealmAndProvider(REALM_ID, KeycloakSession::clientScopes, (cs, realm) -> {
+            // Arrange
+            Map<String, String> searchMap = Map.of("testKey1", "testVal1", "testKey2", "testVal2");
+            Map<String, String> searchMap2 = Map.of("testKey3", "testVal3", "testKey2", "testVal2");
+
+            ClientScopeModel sahara = cs.addClientScope(realm, "Sahara");
+            sahara.setAttribute("testKey1", "testVal1");
+            sahara.setAttribute("testKey2", "testVal2");
+
+            ClientScopeModel kalahari = cs.addClientScope(realm, "Kalahari");
+            kalahari.setAttribute("testKey1", "testVal1");
+            kalahari.setAttribute("testKey2", "testVal2");
+
+            ClientScopeModel gobi = cs.addClientScope(realm, "Gobi");
+            gobi.setAttribute("testKey2", "testVal2");
+            gobi.setAttribute("testKey3", "testVal3");
+
+            Stream<ClientScopeModel> actual = cs.getClientScopesByAttributes(realm, searchMap, false);
+            assertThat(actual)
+                    .hasSize(2)
+                    .map(ClientScopeModel::getName)
+                    .containsExactlyInAnyOrder("Sahara", "Kalahari");
+
+            actual = cs.getClientScopesByAttributes(realm, searchMap, true);
+            assertThat(actual)
+                    .hasSize(3)
+                    .map(ClientScopeModel::getName)
+                    .containsExactlyInAnyOrder("Sahara", "Kalahari", "Gobi");
+
+            actual = cs.getClientScopesByAttributes(realm, searchMap2, false);
+            assertThat(actual)
+                    .hasSize(1)
+                    .map(ClientScopeModel::getName)
+                    .containsExactlyInAnyOrder("Gobi");
+
         });
     }
 }
