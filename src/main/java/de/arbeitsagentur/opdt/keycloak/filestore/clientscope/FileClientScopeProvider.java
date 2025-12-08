@@ -22,13 +22,9 @@ import static de.arbeitsagentur.opdt.keycloak.filestore.common.AbstractFileProvi
 import static org.keycloak.common.util.StackUtil.getShortStackTrace;
 
 import java.util.*;
-
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import de.arbeitsagentur.opdt.keycloak.filestore.group.FileGroupEntity;
-import de.arbeitsagentur.opdt.keycloak.filestore.group.FileGroupStore;
 import org.jboss.logging.Logger;
 import org.keycloak.models.*;
 import org.keycloak.models.utils.KeycloakModelUtils;
@@ -159,7 +155,8 @@ public class FileClientScopeProvider implements ClientScopeProvider {
         LOG.tracef("getClientScopesByAttributes(%s, %s, %s)%s", realm, searchMap, useOr, getShortStackTrace());
         List<ClientScopeModel> result = new ArrayList<>();
         List<FileClientScopeEntity> clientScopes = FileClientScopeStore.readAll().stream()
-                .filter(clientScope -> Objects.equals(clientScope.getRealmId(), realm.getId())).toList();
+                .filter(clientScope -> Objects.equals(clientScope.getRealmId(), realm.getId()))
+                .toList();
 
         for (FileClientScopeEntity clientScope : clientScopes) {
             Map<String, List<String>> attrs = clientScope.getMultivaluedAttributes();
@@ -170,10 +167,12 @@ public class FileClientScopeProvider implements ClientScopeProvider {
             boolean matches;
             if (useOr) {
                 matches = searchMap.entrySet().stream()
-                        .anyMatch(e -> attrs.containsKey(e.getKey()) && attrs.get(e.getKey()).contains(e.getValue()));
+                        .anyMatch(e -> attrs.containsKey(e.getKey())
+                                && attrs.get(e.getKey()).contains(e.getValue()));
             } else {
                 matches = searchMap.entrySet().stream()
-                        .allMatch(e -> attrs.containsKey(e.getKey()) && attrs.get(e.getKey()).contains(e.getValue()));
+                        .allMatch(e -> attrs.containsKey(e.getKey())
+                                && attrs.get(e.getKey()).contains(e.getValue()));
             }
 
             if (matches) {

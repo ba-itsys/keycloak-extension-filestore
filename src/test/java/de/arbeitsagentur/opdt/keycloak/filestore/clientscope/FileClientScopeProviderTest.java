@@ -20,7 +20,6 @@ package de.arbeitsagentur.opdt.keycloak.filestore.clientscope;
 import static org.assertj.core.api.Assertions.*;
 
 import de.arbeitsagentur.opdt.keycloak.filestore.KeycloakModelTest;
-
 import java.util.Map;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -212,11 +211,7 @@ class FileClientScopeProviderTest extends KeycloakModelTest {
                     .containsExactlyInAnyOrder("Sahara", "Kalahari", "Gobi");
 
             actual = cs.getClientScopesByAttributes(realm, searchMap2, false);
-            assertThat(actual)
-                    .hasSize(1)
-                    .map(ClientScopeModel::getName)
-                    .containsExactlyInAnyOrder("Gobi");
-
+            assertThat(actual).hasSize(1).map(ClientScopeModel::getName).containsExactlyInAnyOrder("Gobi");
         });
     }
 }
