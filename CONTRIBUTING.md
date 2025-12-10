@@ -93,13 +93,6 @@ Before you submit:
 - Run `mvn verify` locally and ensure it passes.
 - Update documentation when user-facing behavior or setup changes.
 
-PR checklist:
-
-- [ ] Tests pass locally
-- [ ] Code formatted (Spotless)
-- [ ] Conventional Commit(s)
-- [ ] Docs updated (if needed)
-
 ## License
 
 By contributing, you agree that your contributions will be licensed under the Apache License, Version 2.0. See `LICENSE`
