@@ -231,13 +231,23 @@ public class NullCachedStoreProviderFactory
 
                     @Override
                     public Stream<Policy> findDependentPolicies(
-                            ResourceServer resourceServer, String s, String s1, String s2, String s3) {
+                            ResourceServer resourceServer,
+                            String resourceType,
+                            String groupResourceType,
+                            String associatedPolicyType,
+                            String configKey,
+                            String configValue) {
                         return Stream.empty();
                     }
 
                     @Override
                     public Stream<Policy> findDependentPolicies(
-                            ResourceServer resourceServer, String s, String s1, String s2, List<String> list) {
+                            ResourceServer resourceServer,
+                            String resourceType,
+                            String groupResourceType,
+                            String associatedPolicyType,
+                            String configKey,
+                            List<String> configValues) {
                         return Stream.empty();
                     }
                 };

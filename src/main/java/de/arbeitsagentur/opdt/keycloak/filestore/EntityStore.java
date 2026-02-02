@@ -42,8 +42,22 @@ public final class EntityStore {
 
     private static final Map<Path, AbstractEntity> STORE = new ConcurrentHashMap<>();
     private static final ReadWriteLock LOCK = new ReentrantReadWriteLock();
+    private static volatile boolean initialized = false;
 
-    static {
+    private static void ensureInitialized() {
+        if (initialized) {
+            return;
+        }
+        synchronized (EntityStore.class) {
+            if (initialized) {
+                return;
+            }
+            doInitialize();
+            initialized = true;
+        }
+    }
+
+    private static void doInitialize() {
         Path dataDirectory = EntityIO.getRootDirectory();
         try (Stream<Path> realmsStream = Files.walk(dataDirectory, 1)) {
             realmsStream
@@ -104,6 +118,7 @@ public final class EntityStore {
     }
 
     public static void delete(Path path) {
+        ensureInitialized();
         LOCK.writeLock().lock();
 
         try {
@@ -118,6 +133,7 @@ public final class EntityStore {
     }
 
     public static <E extends AbstractEntity & UpdatableEntity> void write(Path path, E entity) {
+        ensureInitialized();
         LOCK.writeLock().lock();
         try {
             EntityIO.writeToFile(entity, path);
@@ -130,6 +146,7 @@ public final class EntityStore {
     }
 
     public static <E extends AbstractEntity & UpdatableEntity> List<E> getAll(Class<E> interfaceOfEntity) {
+        ensureInitialized();
         LOCK.readLock().lock();
 
         try {
@@ -143,12 +160,21 @@ public final class EntityStore {
     }
 
     public static <E extends AbstractEntity & UpdatableEntity> E get(Path fileName) {
+        ensureInitialized();
         LOCK.readLock().lock();
 
         try {
             return (E) STORE.get(fileName);
         } finally {
             LOCK.readLock().unlock();
+        }
+    }
+
+    // For testing purposes - allows resetting the store state
+    static void reset() {
+        synchronized (EntityStore.class) {
+            STORE.clear();
+            initialized = false;
         }
     }
 }

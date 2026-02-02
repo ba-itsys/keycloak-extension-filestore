@@ -27,6 +27,7 @@ import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.EnvironmentDependentProviderFactory;
 import org.keycloak.provider.ServerInfoAwareProviderFactory;
 import org.keycloak.sessions.StickySessionEncoderProvider;
+import org.keycloak.sessions.StickySessionEncoderProvider.SessionIdAndRoute;
 import org.keycloak.sessions.StickySessionEncoderProviderFactory;
 
 /**
@@ -51,13 +52,28 @@ public class DisabledStickySessionEncoderProvider
     }
 
     @Override
+    public String encodeSessionId(String message, String sessionId) {
+        return message;
+    }
+
+    @Override
     public String decodeSessionId(String encodedSessionId) {
         return encodedSessionId;
     }
 
     @Override
+    public SessionIdAndRoute decodeSessionIdAndRoute(String encodedSessionId) {
+        return new SessionIdAndRoute(encodedSessionId, null);
+    }
+
+    @Override
     public boolean shouldAttachRoute() {
         return false;
+    }
+
+    @Override
+    public String sessionIdRoute(String sessionId) {
+        return null;
     }
 
     @Override

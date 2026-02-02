@@ -117,6 +117,11 @@ public class Config implements ConfigProvider {
         }
 
         @Override
+        public String get(String key) {
+            return get(key, null);
+        }
+
+        @Override
         public String get(String key, String defaultValue) {
             String v = replaceProperties(getConfig().get(prefix + key));
             if (v == null || v.isEmpty()) {
