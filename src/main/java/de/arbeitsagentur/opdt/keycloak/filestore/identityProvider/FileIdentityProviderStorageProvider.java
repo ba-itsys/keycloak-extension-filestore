@@ -2,9 +2,11 @@ package de.arbeitsagentur.opdt.keycloak.filestore.identityProvider;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
+import org.keycloak.broker.provider.util.IdentityProviderTypeUtil;
 import org.keycloak.models.*;
 import org.keycloak.utils.StringUtil;
 
@@ -54,13 +56,37 @@ public class FileIdentityProviderStorageProvider implements IdentityProviderStor
 
     @Override
     public Stream<IdentityProviderModel> getAllStream(
-            Map<String, String> options, Integer firstResult, Integer maxResults) {
+            IdentityProviderQuery query, Integer firstResult, Integer maxResults) {
         int first = firstResult == null || firstResult < 0 ? 0 : firstResult;
         int resultCount = maxResults == null || maxResults < 0 ? Integer.MAX_VALUE : maxResults;
+
+        List<String> includedProviderFactories = null;
+        if (query.getType() != null && query.getType() != IdentityProviderType.ANY) {
+            includedProviderFactories = IdentityProviderTypeUtil.listFactoriesByType(session, query.getType());
+            // If no factories are registered for this type, don't filter by type
+            if (includedProviderFactories != null && includedProviderFactories.isEmpty()) {
+                includedProviderFactories = null;
+            }
+        } else if (query.getCapability() != null) {
+            includedProviderFactories =
+                    IdentityProviderTypeUtil.listFactoriesByCapability(session, query.getCapability());
+            // If no factories are registered for this capability, don't filter by capability
+            if (includedProviderFactories != null && includedProviderFactories.isEmpty()) {
+                includedProviderFactories = null;
+            }
+        }
+
+        Map<String, String> options = query.getOptions();
+        List<String> finalIncludedProviderFactories = includedProviderFactories;
 
         return getRealm()
                 .getIdentityProvidersStream()
                 .filter(idp -> {
+                    if (finalIncludedProviderFactories != null
+                            && !finalIncludedProviderFactories.contains(idp.getProviderId())) {
+                        return false;
+                    }
+
                     if (options == null || options.isEmpty()) {
                         return true;
                     }
@@ -87,14 +113,16 @@ public class FileIdentityProviderStorageProvider implements IdentityProviderStor
 
                     if (options.containsKey(IdentityProviderModel.HIDE_ON_LOGIN)) {
                         boolean hideOnLogin = Boolean.parseBoolean(options.get(IdentityProviderModel.HIDE_ON_LOGIN));
-                        if (idp.isHideOnLogin() != hideOnLogin) {
+                        boolean idpHideOnLogin = idp.isHideOnLogin() != null && idp.isHideOnLogin();
+                        if (idpHideOnLogin != hideOnLogin) {
                             return false;
                         }
                     }
 
                     if (options.containsKey(IdentityProviderModel.LINK_ONLY)) {
                         boolean linkOnly = Boolean.parseBoolean(options.get(IdentityProviderModel.LINK_ONLY));
-                        if (idp.isLinkOnly() != linkOnly) {
+                        boolean idpLinkOnly = idp.isLinkOnly() != null && idp.isLinkOnly();
+                        if (idpLinkOnly != linkOnly) {
                             return false;
                         }
                     }

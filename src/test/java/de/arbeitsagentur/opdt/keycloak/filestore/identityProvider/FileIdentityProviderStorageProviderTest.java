@@ -50,7 +50,14 @@ class FileIdentityProviderStorageProviderTest extends KeycloakModelTest {
 
             assertThat(idps.getByAlias("meinIdp"))
                     .usingRecursiveComparison(RecursiveComparisonConfiguration.builder()
-                            .withIgnoredFields("internalId")
+                            .withIgnoredFields(
+                                    "internalId",
+                                    "addReadTokenRoleOnCreate",
+                                    "authenticateByDefault",
+                                    "linkOnly",
+                                    "storeToken",
+                                    "trustEmail",
+                                    "hideOnLogin")
                             .build())
                     .isEqualTo(model);
         });

@@ -29,6 +29,7 @@ import org.infinispan.util.concurrent.BlockingManager;
 import org.keycloak.Config;
 import org.keycloak.connections.infinispan.InfinispanConnectionProvider;
 import org.keycloak.connections.infinispan.InfinispanConnectionProviderFactory;
+import org.keycloak.connections.infinispan.NodeInfo;
 import org.keycloak.connections.infinispan.TopologyInfo;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
@@ -65,6 +66,11 @@ public class NullInfinispanConnectionProviderFactory
 
             @Override
             public TopologyInfo getTopologyInfo() {
+                return null;
+            }
+
+            @Override
+            public NodeInfo getNodeInfo() {
                 return null;
             }
 
