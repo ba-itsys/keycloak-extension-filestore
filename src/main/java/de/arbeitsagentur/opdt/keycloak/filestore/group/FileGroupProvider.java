@@ -46,6 +46,11 @@ public class FileGroupProvider implements GroupProvider {
             public Stream<GroupModel> getSubGroupsStream() {
                 return getGroupsByParentId(realm, this.getId());
             }
+
+            @Override
+            public OrganizationModel getOrganization() {
+                return null;
+            }
         };
     }
 

@@ -51,6 +51,8 @@ public class FileRealmAdapter extends AbstractRealmModel<FileRealmEntity> implem
     private static final String MAX_DELTA_SECONDS = "maxDeltaTimeSeconds";
     private static final String FAILURE_FACTOR = "failureFactor";
 
+    private static final String SCIM_API_ENABLED = "scimApiEnabled";
+    private static final String MAX_SECONDARY_AUTH_FAILURES = "maxSecondaryAuthFailures";
     private static final String MAX_TEMPORARY_LOCKOUTS = "maxTemporaryLockouts";
     private static final String BRUTE_FORCE_STRATEGY = "bruteForceStrategy";
     public static final String ADMIN_PERMISSIONS_CLIENT_ID = "adminPermissionsClientId";
@@ -1892,5 +1894,25 @@ public class FileRealmAdapter extends AbstractRealmModel<FileRealmEntity> implem
     @Override
     public ParConfig getParPolicy() {
         return new ParConfig(this);
+    }
+
+    @Override
+    public void setScimApiEnabled(boolean enabled) {
+        setAttribute(SCIM_API_ENABLED, enabled);
+    }
+
+    @Override
+    public boolean isScimApiEnabled() {
+        return getAttribute(SCIM_API_ENABLED, Boolean.FALSE);
+    }
+
+    @Override
+    public int getMaxSecondaryAuthFailures() {
+        return getAttribute(MAX_SECONDARY_AUTH_FAILURES, 0);
+    }
+
+    @Override
+    public void setMaxSecondaryAuthFailures(int maxSecondaryAuthFailures) {
+        setAttribute(MAX_SECONDARY_AUTH_FAILURES, maxSecondaryAuthFailures);
     }
 }
