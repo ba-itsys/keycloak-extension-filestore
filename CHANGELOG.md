@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v2.1.2...v2.2.0) (2026-05-13)
+
+
+### Features
+
+* **update:** keycloak bump to 26.6.1, java bump to 25 ([1e4f280](https://github.com/ba-itsys/keycloak-extension-filestore/commit/1e4f28076042075e0e8a67e43a79d6325bd49d5f))
+
 ## [2.1.2](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v2.1.1...v2.1.2) (2026-04-20)
 
 
