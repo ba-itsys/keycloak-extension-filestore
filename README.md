@@ -23,6 +23,20 @@ This extension currently does NOT support Keycloak Organizations and thus must b
 </dependency>
 ```
 
+## Local Development
+
+### Prerequisites
+
+- **JDK**: See `pom.xml` for the required Java version.
+- **Maven**: Used for building the project.
+
+### Checks (formatting and tests)
+
+Run the following commands locally to ensure code quality:
+
+- **Formatting**: `mvn spotless:apply` (Ensures consistent code style).
+- **Verification**: `mvn verify` (Runs the full test suite and builds the project).
+
 ## Keycloak Default Filestore Baseline
 
 `DefaultRealmBaselineTest` compares the filestore that Keycloak creates on startup with the checked-in
