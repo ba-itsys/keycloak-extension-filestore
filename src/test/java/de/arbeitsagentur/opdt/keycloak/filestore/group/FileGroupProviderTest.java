@@ -20,71 +20,78 @@ package de.arbeitsagentur.opdt.keycloak.filestore.group;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import de.arbeitsagentur.opdt.keycloak.filestore.KeycloakModelTest;
+import de.arbeitsagentur.opdt.keycloak.filestore.config.FileStoreKeycloakServerConfig;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.testframework.annotations.InjectRealm;
+import org.keycloak.testframework.annotations.KeycloakIntegrationTest;
+import org.keycloak.testframework.injection.LifeCycle;
+import org.keycloak.testframework.realm.ManagedRealm;
+import org.keycloak.testframework.remote.annotations.TestOnServer;
 
-class FileGroupProviderTest extends KeycloakModelTest {
+@KeycloakIntegrationTest(config = FileStoreKeycloakServerConfig.class)
+public class FileGroupProviderTest extends KeycloakModelTest {
 
     private static final String REALM_ID = "river";
 
-    @Override
-    protected void createEnvironment(KeycloakSession s) {
-        s.realms().createRealm(REALM_ID);
-    }
+    @InjectRealm(ref = REALM_ID, lifecycle = LifeCycle.METHOD)
+    ManagedRealm managedRealm;
 
-    @Override
-    protected void cleanEnvironment(KeycloakSession s) {
-        s.realms().removeRealm(REALM_ID);
-    }
-
-    @ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = {"unknown"})
-    void whenGetGroupById_givenInvalidParam_thenReturnNull(String invalid) {
-        withRealmAndProvider(REALM_ID, KeycloakSession::groups, (groups, realm) -> {
-            var actual = groups.getGroupById(realm, invalid);
-            assertThat(actual).isNull();
+    @TestOnServer
+    public void whenGetGroupById_givenInvalidParam_thenReturnNull(KeycloakSession testSession) {
+        nullEmptyAndUnknownStrings().forEach(invalid -> {
+            withRealmAndProvider(testSession, REALM_ID, KeycloakSession::groups, (groups, realm) -> {
+                var actual = groups.getGroupById(realm, invalid);
+                assertThat(actual).isNull();
+            });
         });
     }
 
-    @Test
-    void whenGetGroupById_givenExistingGroup_thenReturnNotNull() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::groups, (groups, realm) -> {
+    @TestOnServer
+    public void whenGetGroupById_givenExistingGroup_thenReturnNotNull(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::groups, (groups, realm) -> {
             groups.createGroup(realm, "Nile");
             var actual = groups.getGroupById(realm, "Nile");
             assertThat(actual.getId()).isEqualTo("Nile");
         });
     }
 
-    @ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = {"unknown"})
-    void whenGetGroupByName_givenInvalidParam_thenReturnNull(String invalid) {
-        withRealmAndProvider(REALM_ID, KeycloakSession::groups, (groups, realm) -> {
-            var actual = groups.getGroupByName(realm, null, invalid);
-            assertThat(actual).isNull();
+    @TestOnServer
+    public void whenCreateGroup_givenExplicitId_thenNameIsUsedAsReadableIdentifier(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::groups, (groups, realm) -> {
+            var actual = groups.createGroup(realm, "generated-id", "Readable Group");
+
+            assertThat(actual.getId()).isEqualTo("Readable Group");
+            assertThat(groups.getGroupById(realm, "Readable Group")).isNotNull();
+            assertThat(groups.getGroupById(realm, "generated-id")).isNull();
         });
     }
 
-    @Test
-    void whenGetGroupByName_givenExistingGroup_thenReturnNotNull() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::groups, (groups, realm) -> {
+    @TestOnServer
+    public void whenGetGroupByName_givenInvalidParam_thenReturnNull(KeycloakSession testSession) {
+        nullEmptyAndUnknownStrings().forEach(invalid -> {
+            withRealmAndProvider(testSession, REALM_ID, KeycloakSession::groups, (groups, realm) -> {
+                var actual = groups.getGroupByName(realm, null, invalid);
+                assertThat(actual).isNull();
+            });
+        });
+    }
+
+    @TestOnServer
+    public void whenGetGroupByName_givenExistingGroup_thenReturnNotNull(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::groups, (groups, realm) -> {
             groups.createGroup(realm, "Amazon");
             var actual = groups.getGroupByName(realm, null, "Amazon");
             assertThat(actual.getId()).isEqualTo("Amazon");
         });
     }
 
-    @Test
-    void whenGetGroupByName_givenParentGroup_thenReturnNotNull() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::groups, (groups, realm) -> {
+    @TestOnServer
+    public void whenGetGroupByName_givenParentGroup_thenReturnNotNull(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::groups, (groups, realm) -> {
             // Arrange
             var parent = groups.createGroup(realm, "Parent");
             groups.createGroup(realm, "Child").setParent(parent);
@@ -95,9 +102,9 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetGroupsStream_givenNoGroups_thenReturnEmptyStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::groups, (groups, realm) -> {
+    @TestOnServer
+    public void whenGetGroupsStream_givenNoGroups_thenReturnEmptyStream(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::groups, (groups, realm) -> {
             // Act
             var actual = groups.getGroupsStream(realm);
             // Assert
@@ -105,9 +112,9 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetGroupsStream_givenGroups_thenReturnStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::groups, (groups, realm) -> {
+    @TestOnServer
+    public void whenGetGroupsStream_givenGroups_thenReturnStream(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::groups, (groups, realm) -> {
             // Arrange
             groups.createGroup(realm, "Yukon");
             groups.createGroup(realm, "Rio-Grande");
@@ -118,9 +125,9 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetGroupsStreamWithIds_givenNoGroups_thenReturnEmptyStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::groups, (groups, realm) -> {
+    @TestOnServer
+    public void whenGetGroupsStreamWithIds_givenNoGroups_thenReturnEmptyStream(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::groups, (groups, realm) -> {
             // Act
             var actual = groups.getGroupsStream(realm, Stream.of());
             // Assert
@@ -128,9 +135,9 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetGroupsStreamWithIds_givenUnknownGroups_thenReturnEmptyStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::groups, (groups, realm) -> {
+    @TestOnServer
+    public void whenGetGroupsStreamWithIds_givenUnknownGroups_thenReturnEmptyStream(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::groups, (groups, realm) -> {
             // Act
             var actual = groups.getGroupsStream(realm, Stream.of("unknown"));
             // Assert
@@ -138,9 +145,9 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetGroupsStreamWithIds_givenGroups_thenReturnStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::groups, (groups, realm) -> {
+    @TestOnServer
+    public void whenGetGroupsStreamWithIds_givenGroups_thenReturnStream(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::groups, (groups, realm) -> {
             // Arrange
             groups.createGroup(realm, "Yukon");
             groups.createGroup(realm, "Rio-Grande");
@@ -151,9 +158,9 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetGroupsStreamWithIds_givenSearchPattern_thenReturnStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::groups, (groups, realm) -> {
+    @TestOnServer
+    public void whenGetGroupsStreamWithIds_givenSearchPattern_thenReturnStream(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::groups, (groups, realm) -> {
             // Arrange
             groups.createGroup(realm, "patty"); // partial -> exclude
             groups.createGroup(realm, "no-match"); // no match -> exclude
@@ -172,9 +179,9 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetGroupsCount_givenNoGroup_thenReturnZero() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::groups, (groups, realm) -> {
+    @TestOnServer
+    public void whenGetGroupsCount_givenNoGroup_thenReturnZero(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::groups, (groups, realm) -> {
             // Act
             Long actual = groups.getGroupsCount(realm, false);
             // Assert
@@ -182,9 +189,9 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetGroupsCount_givenGroups_thenReturnCount() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::groups, (groups, realm) -> {
+    @TestOnServer
+    public void whenGetGroupsCount_givenGroups_thenReturnCount(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::groups, (groups, realm) -> {
             // Arrange
             groups.createGroup(realm, "Ob");
             groups.createGroup(realm, "Niger");
@@ -195,9 +202,9 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetGroupsCount_givenTopGroups_thenReturnTopCount() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::groups, (groups, realm) -> {
+    @TestOnServer
+    public void whenGetGroupsCount_givenTopGroups_thenReturnTopCount(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::groups, (groups, realm) -> {
             // Arrange
             var parent = groups.createGroup(realm, "Ob");
             groups.createGroup(realm, "Niger", parent);
@@ -208,21 +215,21 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = {"unknown"})
-    void whenGetGroupsCountByNameContaining_givenInvalidParam_thenReturnZero(String invalid) {
-        withRealmAndProvider(REALM_ID, KeycloakSession::groups, (groups, realm) -> {
-            // Act
-            Long actual = groups.getGroupsCountByNameContaining(realm, invalid);
-            // Assert
-            assertThat(actual).isZero();
+    @TestOnServer
+    public void whenGetGroupsCountByNameContaining_givenInvalidParam_thenReturnZero(KeycloakSession testSession) {
+        nullEmptyAndUnknownStrings().forEach(invalid -> {
+            withRealmAndProvider(testSession, REALM_ID, KeycloakSession::groups, (groups, realm) -> {
+                // Act
+                Long actual = groups.getGroupsCountByNameContaining(realm, invalid);
+                // Assert
+                assertThat(actual).isZero();
+            });
         });
     }
 
-    @Test
-    void whenGetGroupsCountByNameContaining_givenGroups_thenReturnCount() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::groups, (groups, realm) -> {
+    @TestOnServer
+    public void whenGetGroupsCountByNameContaining_givenGroups_thenReturnCount(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::groups, (groups, realm) -> {
             // Arrange
             groups.createGroup(realm, "patty"); // partial -> no match
             groups.createGroup(realm, "abc-pattern");
@@ -236,9 +243,9 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetGroupsByRoleStream_givenNoGroups_thenReturnEmptyStreams() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenGetGroupsByRoleStream_givenNoGroups_thenReturnEmptyStreams(KeycloakSession testSession) {
+        withCleanRealm(testSession, (session, realm) -> {
             // Arrange
             var role = session.roles().addRealmRole(realm, "unassigned");
             // Act
@@ -248,9 +255,9 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetGroupsByRoleStream_givenGroups_thenReturnStreams() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenGetGroupsByRoleStream_givenGroups_thenReturnStreams(KeycloakSession testSession) {
+        withCleanRealm(testSession, (session, realm) -> {
             // Arrange
             var role = session.roles().addRealmRole(realm, "Fisherman");
             session.groups().createGroup(realm, "Orinoco").grantRole(role);
@@ -261,9 +268,9 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetTopLevelGroupsStream_givenNoGroups_thenReturnEmptyStream() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenGetTopLevelGroupsStream_givenNoGroups_thenReturnEmptyStream(KeycloakSession testSession) {
+        withCleanRealm(testSession, (session, realm) -> {
             // Act
             var actual = session.groups().getTopLevelGroupsStream(realm);
             // Assert
@@ -271,9 +278,9 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetTopLevelGroupsStream_giveParentChildGroups_thenReturnStream() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenGetTopLevelGroupsStream_giveParentChildGroups_thenReturnStream(KeycloakSession testSession) {
+        withCleanRealm(testSession, (session, realm) -> {
             // Arrange
             session.groups().createGroup(realm, "Tigris");
             var parent = session.groups().createGroup(realm, "Nile");
@@ -285,9 +292,9 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetTopLevelGroupsStream_givenPagination_thenReturnStream() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenGetTopLevelGroupsStream_givenPagination_thenReturnStream(KeycloakSession testSession) {
+        withCleanRealm(testSession, (session, realm) -> {
             // Arrange
             session.groups().createGroup(realm, "Colorado");
             session.groups().createGroup(realm, "Nile"); // start - firstResult = 1
@@ -300,9 +307,9 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetTopLevelGroupsStream_givenSearchPattern_thenReturnStream() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenGetTopLevelGroupsStream_givenSearchPattern_thenReturnStream(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
             // Arrange
             session.groups().createGroup(realm, "patty");
             session.groups().createGroup(realm, "abc-pattern");
@@ -319,9 +326,9 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetTopLevelGroupsStream_givenExactSearch_thenReturnStream() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenGetTopLevelGroupsStream_givenExactSearch_thenReturnStream(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
             // Arrange
             session.groups().createGroup(realm, "patty");
             session.groups().createGroup(realm, "abc-pattern");
@@ -338,9 +345,9 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenSearchGroupsByAttributes_givenNoGroups_thenReturnEmptyStream() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenSearchGroupsByAttributes_givenNoGroups_thenReturnEmptyStream(KeycloakSession testSession) {
+        withCleanRealm(testSession, (session, realm) -> {
             // Act
             var actual = session.groups().searchGroupsByAttributes(realm, Map.of(), null, null);
             // Assert
@@ -348,9 +355,9 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenSearchGroupsByAttributes_givenGroups_thenReturnStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::groups, (groups, realm) -> {
+    @TestOnServer
+    public void whenSearchGroupsByAttributes_givenGroups_thenReturnStream(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::groups, (groups, realm) -> {
             // Arrange
             groups.createGroup(realm, "Rhine").setAttribute("key", List.of("value"));
             groups.createGroup(realm, "Nile").setAttribute("key", List.of("value"));
@@ -362,9 +369,9 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenRemoveGroup_givenNull_thenReturnFalse() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::groups, (groups, realm) -> {
+    @TestOnServer
+    public void whenRemoveGroup_givenNull_thenReturnFalse(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::groups, (groups, realm) -> {
             // Act
             var actual = groups.removeGroup(realm, null);
             // Assert
@@ -372,9 +379,9 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenRemoveGroup_givenGroup_thenReturnTrue() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::groups, (groups, realm) -> {
+    @TestOnServer
+    public void whenRemoveGroup_givenGroup_thenReturnTrue(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::groups, (groups, realm) -> {
             // Arrange
             var group = groups.createGroup(realm, "Ganges");
             // Act
@@ -385,9 +392,9 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenRemoveGroup_givenAlreadyRemovedGroup_thenReturnFalse() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::groups, (groups, realm) -> {
+    @TestOnServer
+    public void whenRemoveGroup_givenAlreadyRemovedGroup_thenReturnFalse(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::groups, (groups, realm) -> {
             // Arrange
             var group = groups.createGroup(realm, "Ganges");
             groups.removeGroup(realm, group); // remove intentionally
@@ -398,9 +405,9 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenAddTopLevelGroup_givenChild_thenChildIsGrownUp() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::groups, (groups, realm) -> {
+    @TestOnServer
+    public void whenAddTopLevelGroup_givenChild_thenChildIsGrownUp(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::groups, (groups, realm) -> {
             // Arrange
             var parent = groups.createGroup(realm, "Parent");
             var child = groups.createGroup(realm, "Child", parent);
@@ -413,9 +420,9 @@ class FileGroupProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenMoveGroup_givenGroups_thenGroupIsMoved() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::groups, (groups, realm) -> {
+    @TestOnServer
+    public void whenMoveGroup_givenGroups_thenGroupIsMoved(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::groups, (groups, realm) -> {
             // Arrange
             var previousParent = groups.createGroup(realm, "Parent1");
             var nextParent = groups.createGroup(realm, "Parent2");

@@ -21,71 +21,70 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 
 import de.arbeitsagentur.opdt.keycloak.filestore.KeycloakModelTest;
+import de.arbeitsagentur.opdt.keycloak.filestore.config.FileStoreKeycloakServerConfig;
 import java.util.Map;
-import org.junit.jupiter.api.Test;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.testframework.annotations.InjectRealm;
+import org.keycloak.testframework.annotations.KeycloakIntegrationTest;
+import org.keycloak.testframework.injection.LifeCycle;
+import org.keycloak.testframework.realm.ManagedRealm;
+import org.keycloak.testframework.remote.annotations.TestOnServer;
 
-class FileClientScopeAdapterTest extends KeycloakModelTest {
+@KeycloakIntegrationTest(config = FileStoreKeycloakServerConfig.class)
+public class FileClientScopeAdapterTest extends KeycloakModelTest {
 
     private static final String REALM_ID = "zoo";
 
-    @Override
-    protected void createEnvironment(KeycloakSession s) {
-        s.realms().createRealm(REALM_ID);
-    }
+    @InjectRealm(ref = REALM_ID, lifecycle = LifeCycle.METHOD)
+    ManagedRealm managedRealm;
 
-    @Override
-    protected void cleanEnvironment(KeycloakSession s) {
-        s.realms().removeRealm(REALM_ID);
-    }
-
-    @Test
-    void whenSetName_thenGet() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clientScopes, (clients, realm) -> {
+    @TestOnServer
+    public void whenSetName_thenGet(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clientScopes, (clients, realm) -> {
             var sut = clients.addClientScope(realm, "gorilla");
             sut.setName("godzilla minus one");
             assertThat(sut.getName()).isEqualTo("godzilla_minus_one");
         });
     }
 
-    @Test
-    void whenSetDescription_thenGet() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clientScopes, (clients, realm) -> {
+    @TestOnServer
+    public void whenSetDescription_thenGet(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clientScopes, (clients, realm) -> {
             var sut = clients.addClientScope(realm, "gorilla");
             sut.setDescription("Large monkey");
             assertThat(sut.getDescription()).isEqualTo("Large monkey");
         });
     }
 
-    @Test
-    void whenSetAttributes_givenUnknownKey_thenNull() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clientScopes, (clients, realm) -> {
+    @TestOnServer
+    public void whenSetAttributes_givenUnknownKey_thenNull(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clientScopes, (clients, realm) -> {
             var sut = clients.addClientScope(realm, "gorilla");
             assertThat(sut.getAttribute("unknown")).isNull();
         });
     }
 
-    @Test
-    void whenSetAttributes_thenGet() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clientScopes, (clients, realm) -> {
+    @TestOnServer
+    public void whenSetAttributes_thenGet(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clientScopes, (clients, realm) -> {
             var sut = clients.addClientScope(realm, "gorilla");
             sut.setAttribute("color", "silver");
             assertThat(sut.getAttribute("color")).isEqualTo("silver");
         });
     }
 
-    @Test
-    void whenRemoveAttributes_givenNoAttr_thenNothingHappens() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clientScopes, (clients, realm) -> {
+    @TestOnServer
+    public void whenRemoveAttributes_givenNoAttr_thenNothingHappens(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clientScopes, (clients, realm) -> {
             var sut = clients.addClientScope(realm, "gorilla");
             // Act & Assert
             assertThatNoException().isThrownBy(() -> sut.removeAttribute("color"));
         });
     }
 
-    @Test
-    void whenRemoveAttributes_thenNull() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clientScopes, (clients, realm) -> {
+    @TestOnServer
+    public void whenRemoveAttributes_thenNull(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clientScopes, (clients, realm) -> {
             var sut = clients.addClientScope(realm, "gorilla");
             sut.setAttribute("color", "silver");
             // Act
@@ -95,9 +94,9 @@ class FileClientScopeAdapterTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetAttributes_givenNoAttributes_thenReturnEmptyStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clientScopes, (clients, realm) -> {
+    @TestOnServer
+    public void whenGetAttributes_givenNoAttributes_thenReturnEmptyStream(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clientScopes, (clients, realm) -> {
             var sut = clients.addClientScope(realm, "giraffe");
             // Act
             var actual = sut.getAttributes();
@@ -106,9 +105,9 @@ class FileClientScopeAdapterTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetAttributes_givenAttributes_thenReturnStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clientScopes, (clients, realm) -> {
+    @TestOnServer
+    public void whenGetAttributes_givenAttributes_thenReturnStream(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clientScopes, (clients, realm) -> {
             var sut = clients.addClientScope(realm, "giraffe");
             sut.setAttribute("height", "tall");
             sut.setAttribute("color", "yellow-brown");

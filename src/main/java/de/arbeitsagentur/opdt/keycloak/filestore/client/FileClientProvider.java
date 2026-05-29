@@ -132,8 +132,7 @@ public class FileClientProvider implements ClientProvider {
                     "Client with same clientId in realm " + realm.getName() + " exists: " + clientId);
         }
         FileClientEntity entity = new FileClientEntity();
-        String newId = id != null ? id : clientId;
-        entity.setId(newId);
+        entity.setId(clientId);
         entity.setRealmId(realm.getId());
         entity.setClientId(clientId);
         entity.setEnabled(true);

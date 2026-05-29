@@ -247,16 +247,16 @@ public class FileGroupProvider implements GroupProvider {
                             + " already exists for requested parent");
                 });
 
-        FileGroupEntity entity = new FileGroupEntity();
-        if (id == null) {
-            entity.setId(name);
+        String groupId = name;
+        if (FileGroupStore.exists(groupId, realm.getId())) {
+            throw new ModelDuplicateException("Group exists: " + groupId);
         }
+
+        FileGroupEntity entity = new FileGroupEntity();
+        entity.setId(groupId);
         entity.setRealmId(realm.getId());
         entity.setName(name);
         entity.setParentId(toParent == null ? null : toParent.getId());
-        if (id != null && FileGroupStore.exists(id, realm.getId())) {
-            throw new ModelDuplicateException("Group exists: " + id);
-        }
 
         FileGroupStore.update(entity);
         return entityToAdapterFunc(realm).apply(entity);

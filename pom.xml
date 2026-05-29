@@ -56,11 +56,23 @@
     <auto-service.version>1.1.1</auto-service.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <junit.version>6.1.0</junit.version>
+    <junit.jupiter.version>6.1.0</junit.jupiter.version>
 
     <sonar.organization>opdt</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.keycloak.testframework</groupId>
+        <artifactId>keycloak-test-framework-bom</artifactId>
+        <version>${keycloak.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -137,7 +149,7 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
-      <version>${junit.version}</version>
+      <version>${junit.jupiter.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -145,7 +157,7 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
-      <version>${junit.version}</version>
+      <version>${junit.jupiter.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -176,6 +188,30 @@
           <artifactId>keycloak-crypto-fips1402</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.keycloak.testframework</groupId>
+      <artifactId>keycloak-test-framework-core</artifactId>
+      <version>${keycloak.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.keycloak.testframework</groupId>
+      <artifactId>keycloak-test-framework-remote</artifactId>
+      <version>${keycloak.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.keycloak.testframework</groupId>
+      <artifactId>keycloak-test-framework-remote-providers</artifactId>
+      <version>${keycloak.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.keycloak.testframework</groupId>
+      <artifactId>keycloak-test-framework-junit5-config</artifactId>
+      <version>${keycloak.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
@@ -315,24 +351,19 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.5.6</version>
         <configuration>
-          <argLine>@{argLine}</argLine>
+          <argLine>@{argLine} -Djava.awt.headless=true
+            -Duser.language=en -Duser.region=US
+            -Djava.util.logging.manager=org.jboss.logmanager.LogManager
+            -Djava.util.concurrent.ForkJoinPool.common.threadFactory=io.quarkus.bootstrap.forkjoin.QuarkusForkJoinWorkerThreadFactory
+            --add-opens=java.base/java.lang=ALL-UNNAMED
+            --add-opens=java.base/java.util=ALL-UNNAMED
+            --add-opens=java.base/java.lang.invoke=ALL-UNNAMED</argLine>
           <runOrder>alphabetical</runOrder>
           <failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
           <parallelTestsTimeoutInSeconds>30</parallelTestsTimeoutInSeconds>
           <systemPropertyVariables>
-            <!-- keycloak.model.parameters lists parameter classes from
-                             org.keycloak.model.parameters package and determine enabled providers -->
-            <keycloak.model.parameters>Map</keycloak.model.parameters>
             <log4j.configuration>file:${project.build.directory}/test-classes/log4j.properties</log4j.configuration>
-            <!-- for the logging to properly work with tests in the 'other' module -->
-            <keycloak.profile.feature.authorization>disabled</keycloak.profile.feature.authorization>
-            <keycloak.profile.feature.admin_fine_grained_authz>disabled</keycloak.profile.feature.admin_fine_grained_authz>
-            <keycloak.profile.feature.opentelemetry>disabled</keycloak.profile.feature.opentelemetry>
-            <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
             <org.jboss.logging.provider>log4j</org.jboss.logging.provider>
-            <argLine>-Djava.awt.headless=true
-                            -Duser.language=en
-                            -Duser.region=US</argLine>
           </systemPropertyVariables>
         </configuration>
       </plugin>

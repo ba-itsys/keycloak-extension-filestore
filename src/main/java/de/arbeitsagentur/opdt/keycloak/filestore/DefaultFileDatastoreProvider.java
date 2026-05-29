@@ -18,6 +18,7 @@
 package de.arbeitsagentur.opdt.keycloak.filestore;
 
 import org.keycloak.models.*;
+import org.keycloak.storage.MigrationManager;
 import org.keycloak.storage.datastore.DefaultDatastoreProvider;
 
 public class DefaultFileDatastoreProvider extends DefaultDatastoreProvider {
@@ -76,5 +77,10 @@ public class DefaultFileDatastoreProvider extends DefaultDatastoreProvider {
     @Override
     public IdentityProviderStorageProvider identityProviders() {
         return session.getProvider(IdentityProviderStorageProvider.class, "file");
+    }
+
+    @Override
+    public MigrationManager getMigrationManager() {
+        return new FileStoreMigrationManager();
     }
 }
