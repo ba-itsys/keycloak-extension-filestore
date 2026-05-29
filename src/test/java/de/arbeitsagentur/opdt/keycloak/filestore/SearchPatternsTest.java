@@ -26,7 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class SearchPatternsTest extends KeycloakModelTest {
+class SearchPatternsTest {
 
     static Stream<Arguments> nullAndNotNullArguments() {
         return Stream.of(arguments(null, null), arguments(null, "not-null"), arguments("not-null", null));

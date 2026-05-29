@@ -123,7 +123,7 @@ public final class EntityStore {
 
         try {
             STORE.remove(path);
-            Files.delete(path);
+            Files.deleteIfExists(path);
             EntityIO.deleteParentDirectoryIfEmpty(path);
         } catch (IOException e) {
             throw new RuntimeException(e);

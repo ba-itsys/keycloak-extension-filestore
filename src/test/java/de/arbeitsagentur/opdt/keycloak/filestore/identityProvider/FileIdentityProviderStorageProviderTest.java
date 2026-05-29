@@ -20,28 +20,29 @@ package de.arbeitsagentur.opdt.keycloak.filestore.identityProvider;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import de.arbeitsagentur.opdt.keycloak.filestore.KeycloakModelTest;
+import de.arbeitsagentur.opdt.keycloak.filestore.config.FileStoreKeycloakServerConfig;
 import java.util.Map;
 import org.assertj.core.api.recursive.comparison.RecursiveComparisonConfiguration;
-import org.junit.jupiter.api.Test;
 import org.keycloak.models.*;
+import org.keycloak.testframework.annotations.InjectRealm;
+import org.keycloak.testframework.annotations.KeycloakIntegrationTest;
+import org.keycloak.testframework.injection.LifeCycle;
+import org.keycloak.testframework.realm.ManagedRealm;
+import org.keycloak.testframework.remote.annotations.TestOnServer;
 
-class FileIdentityProviderStorageProviderTest extends KeycloakModelTest {
+@KeycloakIntegrationTest(config = FileStoreKeycloakServerConfig.class)
+public class FileIdentityProviderStorageProviderTest extends KeycloakModelTest {
 
     private static final String REALM_ID = "mountain";
 
-    @Override
-    protected void createEnvironment(KeycloakSession s) {
-        s.realms().createRealm(REALM_ID);
-    }
+    @InjectRealm(ref = REALM_ID, lifecycle = LifeCycle.METHOD)
+    ManagedRealm managedRealm;
 
-    @Override
-    protected void cleanEnvironment(KeycloakSession s) {
-        s.realms().removeRealm(REALM_ID);
-    }
+    private static final String LOGIN_PROVIDER_ID = "oidc";
 
-    @Test
-    void whenCreateIdentityProvider_givenValidData_thenIdpCanBeRead() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
+    @TestOnServer
+    public void whenCreateIdentityProvider_givenValidData_thenIdpCanBeRead(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
             IdentityProviderModel model = new IdentityProviderModel();
             model.setAlias("meinIdp");
             model.setEnabled(true);
@@ -56,16 +57,73 @@ class FileIdentityProviderStorageProviderTest extends KeycloakModelTest {
                                     "authenticateByDefault",
                                     "linkOnly",
                                     "storeToken",
-                                    "trustEmail",
-                                    "hideOnLogin")
+                                    "trustEmail")
                             .build())
                     .isEqualTo(model);
         });
     }
 
-    @Test
-    void whenRemoveIdentityProvider_idpExists_thenIdpIsDeleted() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
+    @TestOnServer
+    public void whenGetById_givenExistingIdp_thenIdpCanBeRead(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
+            IdentityProviderModel model = new IdentityProviderModel();
+            model.setAlias("meinIdp");
+            model.setEnabled(true);
+            model.setProviderId("bundid");
+            IdentityProviderModel createdModel = idps.create(model);
+
+            assertThat(idps.getById(createdModel.getInternalId()).getAlias()).isEqualTo("meinIdp");
+        });
+    }
+
+    @TestOnServer
+    public void whenUpdateIdentityProvider_givenChangedData_thenIdpIsUpdated(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
+            IdentityProviderStorageProvider idps = session.identityProviders();
+            IdentityProviderModel model = new IdentityProviderModel();
+            model.setAlias("meinIdp");
+            model.setDisplayName("original");
+            model.setEnabled(true);
+            model.setHideOnLogin(false);
+            model.setProviderId(LOGIN_PROVIDER_ID);
+            IdentityProviderModel createdModel = idps.create(model);
+
+            createdModel.setDisplayName("updated");
+            createdModel.setEnabled(false);
+            createdModel.setHideOnLogin(true);
+            createdModel.setConfig(Map.of("key", "value"));
+            idps.update(createdModel);
+
+            IdentityProviderModel updatedModel = idps.getByAlias("meinIdp");
+            assertThat(updatedModel.getDisplayName()).isEqualTo("updated");
+            assertThat(updatedModel.isEnabled()).isFalse();
+            assertThat(updatedModel.isHideOnLogin()).isTrue();
+            assertThat(updatedModel.getConfig()).containsEntry("key", "value");
+        });
+    }
+
+    @TestOnServer
+    public void whenCount_givenIdpsExist_thenReturnsNumberOfIdps(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
+            IdentityProviderModel model1 = new IdentityProviderModel();
+            model1.setAlias("meinIdp");
+            model1.setEnabled(true);
+            model1.setProviderId("bundid");
+            idps.create(model1);
+
+            IdentityProviderModel model2 = new IdentityProviderModel();
+            model2.setAlias("meinIdp2");
+            model2.setEnabled(true);
+            model2.setProviderId("bundid");
+            idps.create(model2);
+
+            assertThat(idps.count()).isEqualTo(2);
+        });
+    }
+
+    @TestOnServer
+    public void whenRemoveIdentityProvider_idpExists_thenIdpIsDeleted(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
             IdentityProviderModel model = new IdentityProviderModel();
             model.setAlias("meinIdp");
             model.setEnabled(true);
@@ -78,9 +136,9 @@ class FileIdentityProviderStorageProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenRemoveAllIdps_idpsExist_thenAllIdpsAreDeleted() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
+    @TestOnServer
+    public void whenRemoveAllIdps_idpsExist_thenAllIdpsAreDeleted(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
             IdentityProviderModel model1 = new IdentityProviderModel();
             model1.setAlias("meinIdp");
             model1.setEnabled(true);
@@ -100,34 +158,35 @@ class FileIdentityProviderStorageProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenRemoveIdentityProvider_idpDoesNotExist_thenNoExceptionIsThrown() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
+    @TestOnServer
+    public void whenRemoveIdentityProvider_idpDoesNotExist_thenNoExceptionIsThrown(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
             idps.remove("meinIdp");
 
             assertThat(idps.getByAlias("meinIdp")).isNull();
         });
     }
 
-    @Test
-    void whenGetForLogin_fetchModeRealm_thenReturnsAllRealmIdps() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
+    @TestOnServer
+    public void whenGetForLogin_fetchModeRealm_thenReturnsAllRealmIdps(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
+            IdentityProviderStorageProvider idps = session.identityProviders();
             IdentityProviderModel model1 = new IdentityProviderModel();
             model1.setAlias("meinIdp");
             model1.setEnabled(true);
-            model1.setProviderId("bundid");
+            model1.setProviderId(LOGIN_PROVIDER_ID);
             idps.create(model1);
 
             IdentityProviderModel model2 = new IdentityProviderModel();
             model2.setAlias("meinIdp2");
             model2.setEnabled(true);
-            model2.setProviderId("muk");
+            model2.setProviderId(LOGIN_PROVIDER_ID);
             idps.create(model2);
 
             IdentityProviderModel orgIdp = new IdentityProviderModel();
             orgIdp.setAlias("meinIdp3");
             orgIdp.setEnabled(true);
-            orgIdp.setProviderId("orgi");
+            orgIdp.setProviderId(LOGIN_PROVIDER_ID);
             orgIdp.setOrganizationId("myorg");
             idps.create(orgIdp);
 
@@ -137,32 +196,33 @@ class FileIdentityProviderStorageProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetForLogin_fetchModeOrg_thenReturnsAllOrgIdps() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
+    @TestOnServer
+    public void whenGetForLogin_fetchModeOrg_thenReturnsAllOrgIdps(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
+            IdentityProviderStorageProvider idps = session.identityProviders();
             IdentityProviderModel model1 = new IdentityProviderModel();
             model1.setAlias("meinIdp");
             model1.setEnabled(true);
-            model1.setProviderId("bundid");
+            model1.setProviderId(LOGIN_PROVIDER_ID);
             idps.create(model1);
 
             IdentityProviderModel model2 = new IdentityProviderModel();
             model2.setAlias("meinIdp2");
             model2.setEnabled(true);
-            model2.setProviderId("muk");
+            model2.setProviderId(LOGIN_PROVIDER_ID);
             idps.create(model2);
 
             IdentityProviderModel orgIdp = new IdentityProviderModel();
             orgIdp.setAlias("meinIdp3");
             orgIdp.setEnabled(true);
-            orgIdp.setProviderId("orgi");
+            orgIdp.setProviderId(LOGIN_PROVIDER_ID);
             orgIdp.setOrganizationId("myorg");
             idps.create(orgIdp);
 
             IdentityProviderModel orgIdp2 = new IdentityProviderModel();
             orgIdp2.setAlias("meinIdp4");
             orgIdp2.setEnabled(true);
-            orgIdp2.setProviderId("orgi");
+            orgIdp2.setProviderId(LOGIN_PROVIDER_ID);
             orgIdp2.setOrganizationId("myorg2");
             idps.create(orgIdp2);
 
@@ -172,32 +232,33 @@ class FileIdentityProviderStorageProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetForLogin_fetchModeAll_thenReturnsAllIdps() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
+    @TestOnServer
+    public void whenGetForLogin_fetchModeAll_thenReturnsAllIdps(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
+            IdentityProviderStorageProvider idps = session.identityProviders();
             IdentityProviderModel model1 = new IdentityProviderModel();
             model1.setAlias("meinIdp");
             model1.setEnabled(true);
-            model1.setProviderId("bundid");
+            model1.setProviderId(LOGIN_PROVIDER_ID);
             idps.create(model1);
 
             IdentityProviderModel model2 = new IdentityProviderModel();
             model2.setAlias("meinIdp2");
             model2.setEnabled(true);
-            model2.setProviderId("muk");
+            model2.setProviderId(LOGIN_PROVIDER_ID);
             idps.create(model2);
 
             IdentityProviderModel orgIdp = new IdentityProviderModel();
             orgIdp.setAlias("meinIdp3");
             orgIdp.setEnabled(true);
-            orgIdp.setProviderId("orgi");
+            orgIdp.setProviderId(LOGIN_PROVIDER_ID);
             orgIdp.setOrganizationId("myorg");
             idps.create(orgIdp);
 
             IdentityProviderModel orgIdp2 = new IdentityProviderModel();
             orgIdp2.setAlias("meinIdp4");
             orgIdp2.setEnabled(true);
-            orgIdp2.setProviderId("orgi");
+            orgIdp2.setProviderId(LOGIN_PROVIDER_ID);
             orgIdp2.setOrganizationId("myorg2");
             idps.create(orgIdp2);
 
@@ -207,9 +268,46 @@ class FileIdentityProviderStorageProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetByFlow_flowIdExists_thenReturnsMatchingIdps() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
+    @TestOnServer
+    public void whenGetForLogin_givenUnknownProviderFactory_thenIdpIsHidden(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
+            IdentityProviderModel model = new IdentityProviderModel();
+            model.setAlias("meinIdp");
+            model.setEnabled(true);
+            model.setProviderId("unknown-provider");
+            idps.create(model);
+
+            assertThat(idps.getForLogin(IdentityProviderStorageProvider.FetchMode.REALM_ONLY, null))
+                    .isEmpty();
+        });
+    }
+
+    @TestOnServer
+    public void whenGetForLogin_givenHiddenIdp_thenIdpIsHidden(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
+            IdentityProviderModel visibleModel = new IdentityProviderModel();
+            visibleModel.setAlias("visibleIdp");
+            visibleModel.setEnabled(true);
+            visibleModel.setProviderId(LOGIN_PROVIDER_ID);
+            idps.create(visibleModel);
+
+            IdentityProviderModel hiddenModel = new IdentityProviderModel();
+            hiddenModel.setAlias("hiddenIdp");
+            hiddenModel.setEnabled(true);
+            hiddenModel.setHideOnLogin(true);
+            hiddenModel.setProviderId(LOGIN_PROVIDER_ID);
+            idps.create(hiddenModel);
+
+            assertThat(idps.getForLogin(IdentityProviderStorageProvider.FetchMode.REALM_ONLY, null)
+                            .map(IdentityProviderModel::getAlias))
+                    .containsExactly("visibleIdp");
+        });
+    }
+
+    @TestOnServer
+    public void whenGetByFlow_flowIdExists_thenReturnsMatchingIdps(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
+            IdentityProviderStorageProvider idps = session.identityProviders();
             IdentityProviderModel model1 = new IdentityProviderModel();
             model1.setAlias("meinIdp");
             model1.setEnabled(true);
@@ -243,9 +341,10 @@ class FileIdentityProviderStorageProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetByFlow_givenSearchTerm_thenReturnsMatchingIdps() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
+    @TestOnServer
+    public void whenGetByFlow_givenSearchTerm_thenReturnsMatchingIdps(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
+            IdentityProviderStorageProvider idps = session.identityProviders();
             IdentityProviderModel model1 = new IdentityProviderModel();
             model1.setAlias("meinIdp");
             model1.setEnabled(true);
@@ -280,9 +379,9 @@ class FileIdentityProviderStorageProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenCreateMapper_givenValidData_thenMapperCanBeRead() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
+    @TestOnServer
+    public void whenCreateMapper_givenValidData_thenMapperCanBeRead(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
             IdentityProviderMapperModel model = new IdentityProviderMapperModel();
             model.setId("blubb");
             model.setName("meinMapper");
@@ -295,9 +394,71 @@ class FileIdentityProviderStorageProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetMapperByAlias_givenMultipleMappers_thenMatchingMappersAreReturned() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
+    @TestOnServer
+    public void whenUpdateMapper_givenExistingMapper_thenMapperIsUpdated(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
+            IdentityProviderMapperModel model = new IdentityProviderMapperModel();
+            model.setId("blubb");
+            model.setName("meinMapper");
+            model.setIdentityProviderAlias("meinIdp1");
+            model.setIdentityProviderMapper("mapperId1");
+            model.setConfig(Map.of("key", "old"));
+            idps.createMapper(model);
+
+            model.setName("meinMapperUpdated");
+            model.setIdentityProviderMapper("mapperId2");
+            model.setConfig(Map.of("key", "new"));
+            idps.updateMapper(model);
+
+            IdentityProviderMapperModel updatedModel = idps.getMapperById("blubb");
+            assertThat(updatedModel.getName()).isEqualTo("meinMapperUpdated");
+            assertThat(updatedModel.getIdentityProviderMapper()).isEqualTo("mapperId2");
+            assertThat(updatedModel.getConfig()).containsEntry("key", "new");
+        });
+    }
+
+    @TestOnServer
+    public void whenRemoveMapper_givenExistingMapper_thenMapperIsDeleted(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
+            IdentityProviderMapperModel model = new IdentityProviderMapperModel();
+            model.setId("blubb");
+            model.setName("meinMapper");
+            model.setIdentityProviderAlias("meinIdp1");
+            model.setIdentityProviderMapper("mapperId1");
+            idps.createMapper(model);
+
+            idps.removeMapper(model);
+
+            assertThat(idps.getMapperById("blubb")).isNull();
+        });
+    }
+
+    @TestOnServer
+    public void whenRemoveAllMappers_givenExistingMappers_thenAllMappersAreDeleted(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
+            IdentityProviderMapperModel model1 = new IdentityProviderMapperModel();
+            model1.setId("blubb");
+            model1.setName("meinMapper");
+            model1.setIdentityProviderAlias("meinIdp1");
+            model1.setIdentityProviderMapper("mapperId1");
+            idps.createMapper(model1);
+
+            IdentityProviderMapperModel model2 = new IdentityProviderMapperModel();
+            model2.setId("blubb2");
+            model2.setName("meinMapper2");
+            model2.setIdentityProviderAlias("meinIdp2");
+            model2.setIdentityProviderMapper("mapperId2");
+            idps.createMapper(model2);
+
+            idps.removeAllMappers();
+
+            assertThat(idps.getMappersStream()).isEmpty();
+        });
+    }
+
+    @TestOnServer
+    public void whenGetMapperByAlias_givenMultipleMappers_thenMatchingMappersAreReturned(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
             IdentityProviderMapperModel model = new IdentityProviderMapperModel();
             model.setId("blubb");
             model.setName("meinMapper");
@@ -324,9 +485,9 @@ class FileIdentityProviderStorageProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetMappers_givenMultipleMappers_thenAllMappersAreReturned() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
+    @TestOnServer
+    public void whenGetMappers_givenMultipleMappers_thenAllMappersAreReturned(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
             IdentityProviderMapperModel model = new IdentityProviderMapperModel();
             model.setId("blubb");
             model.setName("meinMapper");
@@ -353,9 +514,9 @@ class FileIdentityProviderStorageProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetMappers_givenSearchOptions_thenAllMatchingMappersAreReturned() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
+    @TestOnServer
+    public void whenGetMappers_givenSearchOptions_thenAllMatchingMappersAreReturned(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::identityProviders, (idps, realm) -> {
             IdentityProviderMapperModel model = new IdentityProviderMapperModel();
             model.setId("blubb");
             model.setName("meinMapper");

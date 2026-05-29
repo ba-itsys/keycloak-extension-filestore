@@ -1,0 +1,27 @@
+attributes: {}
+clientId: null
+compositeRoles:
+- create-realm
+- master-realm:create-client
+- master-realm:view-realm
+- master-realm:view-users
+- master-realm:view-clients
+- master-realm:view-events
+- master-realm:view-identity-providers
+- master-realm:view-authorization
+- master-realm:manage-realm
+- master-realm:manage-users
+- master-realm:manage-clients
+- master-realm:manage-events
+- master-realm:manage-identity-providers
+- master-realm:manage-authorization
+- master-realm:query-users
+- master-realm:query-clients
+- master-realm:query-realms
+- master-realm:query-groups
+- master-realm:impersonation
+description: ${role_admin}
+id: admin
+name: admin
+realmId: master
+updated: false

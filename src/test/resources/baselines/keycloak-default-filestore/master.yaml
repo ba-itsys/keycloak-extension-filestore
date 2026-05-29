@@ -1,0 +1,986 @@
+accessCodeLifespan: 60
+accessCodeLifespanLogin: 1800
+accessCodeLifespanUserAction: 300
+accessTokenLifespan: 60
+accessTokenLifespanForImplicitFlow: 900
+accountTheme: null
+actionTokenGeneratedByAdminLifespan: null
+adminEventsDetailsEnabled: null
+adminEventsEnabled: null
+adminTheme: null
+allowUserManagedAccess: null
+attributes:
+  maxSecondaryAuthFailures: '0'
+  maxTemporaryLockouts: '0'
+  failureFactor: '30'
+  defaultSignatureAlgorithm: RS256
+  permanentLockout: 'false'
+  quickLoginCheckMilliSeconds: '1000'
+  maxDeltaTimeSeconds: '43200'
+  bruteForceProtected: 'false'
+  maxFailureWaitSeconds: '900'
+  minimumQuickLoginWaitSeconds: '60'
+  waitIncrementSeconds: '60'
+  bruteForceStrategy: MULTIPLE
+authenticationExecutions:
+- authenticator: auth-cookie
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 10
+  requirement: ALTERNATIVE
+  updated: false
+- authenticator: auth-spnego
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 20
+  requirement: DISABLED
+  updated: false
+- authenticator: identity-provider-redirector
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 25
+  requirement: ALTERNATIVE
+  updated: false
+- authenticator: null
+  authenticatorConfig: null
+  autheticatorFlow: true
+  flowId: <generated-id>
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 30
+  requirement: ALTERNATIVE
+  updated: false
+- authenticator: auth-username-password-form
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 10
+  requirement: REQUIRED
+  updated: false
+- authenticator: null
+  authenticatorConfig: null
+  autheticatorFlow: true
+  flowId: <generated-id>
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 20
+  requirement: CONDITIONAL
+  updated: false
+- authenticator: conditional-user-configured
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 10
+  requirement: REQUIRED
+  updated: false
+- authenticator: conditional-credential
+  authenticatorConfig: <generated-id>
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 20
+  requirement: REQUIRED
+  updated: false
+- authenticator: auth-otp-form
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 30
+  requirement: ALTERNATIVE
+  updated: false
+- authenticator: webauthn-authenticator
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 40
+  requirement: DISABLED
+  updated: false
+- authenticator: auth-recovery-authn-code-form
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 50
+  requirement: DISABLED
+  updated: false
+- authenticator: direct-grant-validate-username
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 10
+  requirement: REQUIRED
+  updated: false
+- authenticator: direct-grant-validate-password
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 20
+  requirement: REQUIRED
+  updated: false
+- authenticator: null
+  authenticatorConfig: null
+  autheticatorFlow: true
+  flowId: <generated-id>
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 30
+  requirement: CONDITIONAL
+  updated: false
+- authenticator: conditional-user-configured
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 10
+  requirement: REQUIRED
+  updated: false
+- authenticator: direct-grant-validate-otp
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 20
+  requirement: REQUIRED
+  updated: false
+- authenticator: registration-page-form
+  authenticatorConfig: null
+  autheticatorFlow: true
+  flowId: <generated-id>
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 10
+  requirement: REQUIRED
+  updated: false
+- authenticator: registration-user-creation
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 20
+  requirement: REQUIRED
+  updated: false
+- authenticator: registration-password-action
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 50
+  requirement: REQUIRED
+  updated: false
+- authenticator: registration-recaptcha-action
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 60
+  requirement: DISABLED
+  updated: false
+- authenticator: registration-terms-and-conditions
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 70
+  requirement: DISABLED
+  updated: false
+- authenticator: reset-credentials-choose-user
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 10
+  requirement: REQUIRED
+  updated: false
+- authenticator: reset-credential-email
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 20
+  requirement: REQUIRED
+  updated: false
+- authenticator: reset-password
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 30
+  requirement: REQUIRED
+  updated: false
+- authenticator: null
+  authenticatorConfig: null
+  autheticatorFlow: true
+  flowId: <generated-id>
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 40
+  requirement: CONDITIONAL
+  updated: false
+- authenticator: conditional-user-configured
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 10
+  requirement: REQUIRED
+  updated: false
+- authenticator: reset-otp
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 20
+  requirement: REQUIRED
+  updated: false
+- authenticator: client-secret
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 10
+  requirement: ALTERNATIVE
+  updated: false
+- authenticator: client-jwt
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 20
+  requirement: ALTERNATIVE
+  updated: false
+- authenticator: client-secret-jwt
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 30
+  requirement: ALTERNATIVE
+  updated: false
+- authenticator: client-x509
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 40
+  requirement: ALTERNATIVE
+  updated: false
+- authenticator: federated-jwt
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 50
+  requirement: ALTERNATIVE
+  updated: false
+- authenticator: idp-review-profile
+  authenticatorConfig: <generated-id>
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 10
+  requirement: REQUIRED
+  updated: false
+- authenticator: null
+  authenticatorConfig: null
+  autheticatorFlow: true
+  flowId: <generated-id>
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 20
+  requirement: REQUIRED
+  updated: false
+- authenticator: idp-create-user-if-unique
+  authenticatorConfig: <generated-id>
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 10
+  requirement: ALTERNATIVE
+  updated: false
+- authenticator: null
+  authenticatorConfig: null
+  autheticatorFlow: true
+  flowId: <generated-id>
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 20
+  requirement: ALTERNATIVE
+  updated: false
+- authenticator: idp-confirm-link
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 10
+  requirement: REQUIRED
+  updated: false
+- authenticator: null
+  authenticatorConfig: null
+  autheticatorFlow: true
+  flowId: <generated-id>
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 20
+  requirement: REQUIRED
+  updated: false
+- authenticator: idp-email-verification
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 10
+  requirement: ALTERNATIVE
+  updated: false
+- authenticator: null
+  authenticatorConfig: null
+  autheticatorFlow: true
+  flowId: <generated-id>
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 20
+  requirement: ALTERNATIVE
+  updated: false
+- authenticator: idp-username-password-form
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 10
+  requirement: REQUIRED
+  updated: false
+- authenticator: null
+  authenticatorConfig: null
+  autheticatorFlow: true
+  flowId: <generated-id>
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 20
+  requirement: CONDITIONAL
+  updated: false
+- authenticator: conditional-user-configured
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 10
+  requirement: REQUIRED
+  updated: false
+- authenticator: conditional-credential
+  authenticatorConfig: <generated-id>
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 20
+  requirement: REQUIRED
+  updated: false
+- authenticator: auth-otp-form
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 30
+  requirement: ALTERNATIVE
+  updated: false
+- authenticator: webauthn-authenticator
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 40
+  requirement: DISABLED
+  updated: false
+- authenticator: auth-recovery-authn-code-form
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 50
+  requirement: DISABLED
+  updated: false
+- authenticator: http-basic-authenticator
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 10
+  requirement: REQUIRED
+  updated: false
+- authenticator: docker-http-basic-authenticator
+  authenticatorConfig: null
+  autheticatorFlow: false
+  flowId: null
+  id: <generated-id>
+  parentFlowId: <generated-id>
+  priority: 10
+  requirement: REQUIRED
+  updated: false
+authenticationFlows:
+- alias: browser
+  builtIn: true
+  description: Browser based authentication
+  id: <generated-id>
+  providerId: basic-flow
+  topLevel: true
+  updated: false
+- alias: forms
+  builtIn: true
+  description: Username, password, otp and other auth forms.
+  id: <generated-id>
+  providerId: basic-flow
+  topLevel: false
+  updated: false
+- alias: Browser - Conditional 2FA
+  builtIn: true
+  description: Flow to determine if any 2FA is required for the authentication
+  id: <generated-id>
+  providerId: basic-flow
+  topLevel: false
+  updated: false
+- alias: direct grant
+  builtIn: true
+  description: OpenID Connect Resource Owner Grant
+  id: <generated-id>
+  providerId: basic-flow
+  topLevel: true
+  updated: false
+- alias: Direct Grant - Conditional OTP
+  builtIn: true
+  description: Flow to determine if the OTP is required for the authentication
+  id: <generated-id>
+  providerId: basic-flow
+  topLevel: false
+  updated: false
+- alias: registration
+  builtIn: true
+  description: Registration flow
+  id: <generated-id>
+  providerId: basic-flow
+  topLevel: true
+  updated: false
+- alias: registration form
+  builtIn: true
+  description: Registration form
+  id: <generated-id>
+  providerId: form-flow
+  topLevel: false
+  updated: false
+- alias: reset credentials
+  builtIn: true
+  description: Reset credentials for a user if they forgot their password or something
+  id: <generated-id>
+  providerId: basic-flow
+  topLevel: true
+  updated: false
+- alias: Reset - Conditional OTP
+  builtIn: true
+  description: Flow to determine if the OTP should be reset or not. Set to REQUIRED
+    to force.
+  id: <generated-id>
+  providerId: basic-flow
+  topLevel: false
+  updated: false
+- alias: clients
+  builtIn: true
+  description: Base authentication for clients
+  id: <generated-id>
+  providerId: client-flow
+  topLevel: true
+  updated: false
+- alias: first broker login
+  builtIn: true
+  description: Actions taken after first broker login with identity provider account,
+    which is not yet linked to any Keycloak account
+  id: <generated-id>
+  providerId: basic-flow
+  topLevel: true
+  updated: false
+- alias: User creation or linking
+  builtIn: true
+  description: Flow for the existing/non-existing user alternatives
+  id: <generated-id>
+  providerId: basic-flow
+  topLevel: false
+  updated: false
+- alias: Handle Existing Account
+  builtIn: true
+  description: Handle what to do if there is existing account with same email/username
+    like authenticated identity provider
+  id: <generated-id>
+  providerId: basic-flow
+  topLevel: false
+  updated: false
+- alias: Account verification options
+  builtIn: true
+  description: Method with which to verify the existing account
+  id: <generated-id>
+  providerId: basic-flow
+  topLevel: false
+  updated: false
+- alias: Verify Existing Account by Re-authentication
+  builtIn: true
+  description: Reauthentication of existing account
+  id: <generated-id>
+  providerId: basic-flow
+  topLevel: false
+  updated: false
+- alias: First broker login - Conditional 2FA
+  builtIn: true
+  description: Flow to determine if any 2FA is required for the authentication
+  id: <generated-id>
+  providerId: basic-flow
+  topLevel: false
+  updated: false
+- alias: saml ecp
+  builtIn: true
+  description: SAML ECP Profile Authentication Flow
+  id: <generated-id>
+  providerId: basic-flow
+  topLevel: true
+  updated: false
+- alias: docker auth
+  builtIn: true
+  description: Used by Docker clients to authenticate against the IDP
+  id: <generated-id>
+  providerId: basic-flow
+  topLevel: true
+  updated: false
+authenticatorConfigs:
+- alias: browser-conditional-credential
+  config:
+    credentials: webauthn-passwordless
+  id: <generated-id>
+  updated: false
+- alias: review profile config
+  config:
+    update.profile.on.first.login: missing
+  id: <generated-id>
+  updated: false
+- alias: create unique user config
+  config:
+    require.password.update.after.registration: 'false'
+  id: <generated-id>
+  updated: false
+- alias: first-broker-login-conditional-credential
+  config:
+    credentials: webauthn-passwordless
+  id: <generated-id>
+  updated: false
+browserFlow: <generated-id>
+browserSecurityHeaders:
+  contentSecurityPolicyReportOnly: ''
+  xContentTypeOptions: nosniff
+  referrerPolicy: no-referrer
+  xRobotsTag: none
+  xFrameOptions: SAMEORIGIN
+  contentSecurityPolicy: frame-src 'self'; frame-ancestors 'self'; object-src 'none';
+  strictTransportSecurity: max-age=31536000; includeSubDomains
+clientAuthenticationFlow: <generated-id>
+clientInitialAccesses: []
+clientOfflineSessionIdleTimeout: null
+clientOfflineSessionMaxLifespan: null
+clientSessionIdleTimeout: null
+clientSessionMaxLifespan: null
+components:
+- config:
+    host-sending-registration-request-must-match: 'true'
+    trusted-hosts: null
+    client-uris-must-match: 'true'
+  id: <generated-id>
+  name: Trusted Hosts
+  parentId: master
+  providerId: trusted-hosts
+  providerType: org.keycloak.services.clientregistration.policy.ClientRegistrationPolicy
+  subType: anonymous
+  updated: false
+- config: {}
+  id: <generated-id>
+  name: Consent Required
+  parentId: master
+  providerId: consent-required
+  providerType: org.keycloak.services.clientregistration.policy.ClientRegistrationPolicy
+  subType: anonymous
+  updated: false
+- config: {}
+  id: <generated-id>
+  name: Full Scope Disabled
+  parentId: master
+  providerId: scope
+  providerType: org.keycloak.services.clientregistration.policy.ClientRegistrationPolicy
+  subType: anonymous
+  updated: false
+- config:
+    max-clients: '200'
+  id: <generated-id>
+  name: Max Clients Limit
+  parentId: master
+  providerId: max-clients
+  providerType: org.keycloak.services.clientregistration.policy.ClientRegistrationPolicy
+  subType: anonymous
+  updated: false
+- config:
+    allowed-protocol-mapper-types: saml-user-attribute-mapper
+  id: <generated-id>
+  name: Allowed Protocol Mapper Types
+  parentId: master
+  providerId: allowed-protocol-mappers
+  providerType: org.keycloak.services.clientregistration.policy.ClientRegistrationPolicy
+  subType: anonymous
+  updated: false
+- config:
+    allow-default-scopes: 'true'
+    allowed-client-scopes: null
+  id: <generated-id>
+  name: Allowed Client Scopes
+  parentId: master
+  providerId: allowed-client-templates
+  providerType: org.keycloak.services.clientregistration.policy.ClientRegistrationPolicy
+  subType: anonymous
+  updated: false
+- config:
+    web-origins: null
+  id: <generated-id>
+  name: Allowed Registration Web Origins
+  parentId: master
+  providerId: registration-web-origins
+  providerType: org.keycloak.services.clientregistration.policy.ClientRegistrationPolicy
+  subType: anonymous
+  updated: false
+- config:
+    allowed-protocol-mapper-types: saml-user-attribute-mapper
+  id: <generated-id>
+  name: Allowed Protocol Mapper Types
+  parentId: master
+  providerId: allowed-protocol-mappers
+  providerType: org.keycloak.services.clientregistration.policy.ClientRegistrationPolicy
+  subType: authenticated
+  updated: false
+- config:
+    allow-default-scopes: 'true'
+    allowed-client-scopes: null
+  id: <generated-id>
+  name: Allowed Client Scopes
+  parentId: master
+  providerId: allowed-client-templates
+  providerType: org.keycloak.services.clientregistration.policy.ClientRegistrationPolicy
+  subType: authenticated
+  updated: false
+- config:
+    web-origins: null
+  id: <generated-id>
+  name: Allowed Registration Web Origins
+  parentId: master
+  providerId: registration-web-origins
+  providerType: org.keycloak.services.clientregistration.policy.ClientRegistrationPolicy
+  subType: authenticated
+  updated: false
+- config:
+    privateKey: <generated-private-key>
+    keyUse: SIG
+    certificate: <generated-certificate>
+    priority: '100'
+  id: <generated-id>
+  name: rsa-generated
+  parentId: master
+  providerId: rsa-generated
+  providerType: org.keycloak.keys.KeyProvider
+  subType: null
+  updated: false
+- config:
+    privateKey: <generated-private-key>
+    keyUse: ENC
+    certificate: <generated-certificate>
+    priority: '100'
+    algorithm: RSA-OAEP
+  id: <generated-id>
+  name: rsa-enc-generated
+  parentId: master
+  providerId: rsa-enc-generated
+  providerType: org.keycloak.keys.KeyProvider
+  subType: null
+  updated: false
+- config:
+    kid: <generated-id>
+    secret: <generated-secret>
+    priority: '100'
+    algorithm: HS512
+  id: <generated-id>
+  name: hmac-generated-hs512
+  parentId: master
+  providerId: hmac-generated
+  providerType: org.keycloak.keys.KeyProvider
+  subType: null
+  updated: false
+- config:
+    kid: <generated-id>
+    secret: <generated-secret>
+    priority: '100'
+  id: <generated-id>
+  name: aes-generated
+  parentId: master
+  providerId: aes-generated
+  providerType: org.keycloak.keys.KeyProvider
+  subType: null
+  updated: false
+- config: {}
+  id: <generated-id>
+  name: null
+  parentId: master
+  providerId: declarative-user-profile
+  providerType: org.keycloak.userprofile.UserProfileProvider
+  subType: null
+  updated: false
+defaultClientScopeIds:
+- role_list
+- profile
+- email
+- roles
+- web-origins
+- acr
+- basic
+defaultGroupIds: []
+defaultLocale: null
+defaultRoleId: default-roles-master
+directGrantFlow: <generated-id>
+displayName: Keycloak
+displayNameHtml: <div class="kc-logo-text"><span>Keycloak</span></div>
+dockerAuthenticationFlow: <generated-id>
+duplicateEmailsAllowed: null
+editUsernameAllowed: null
+emailTheme: null
+enabled: true
+enabledEventTypes: []
+eventsEnabled: null
+eventsExpiration: null
+eventsListeners:
+- jboss-logging
+firstBrokerLoginFlow: <generated-id>
+hasClientInitialAccess: false
+id: master
+identityProviderMappers: []
+identityProviders: []
+internationalizationEnabled: null
+localizationTexts: {}
+loginTheme: null
+loginWithEmailAllowed: true
+masterAdminClient: master-realm
+name: master
+notBefore: null
+offlineSessionIdleTimeout: 2592000
+offlineSessionMaxLifespan: 5184000
+offlineSessionMaxLifespanEnabled: false
+optionalClientScopeIds:
+- offline_access
+- address
+- phone
+- microprofile-jwt
+otpPolicy:
+  otpPolicyAlgorithm: HmacSHA1
+  otpPolicyDigits: 6
+  otpPolicyInitialCounter: 0
+  otpPolicyLookAheadWindow: 1
+  otpPolicyPeriod: 30
+  otpPolicyType: totp
+  updated: false
+passwordPolicy: null
+refreshTokenMaxReuse: null
+registrationAllowed: false
+registrationEmailAsUsername: false
+registrationFlow: <generated-id>
+rememberMe: null
+requiredActionProviders:
+- alias: VERIFY_EMAIL
+  config: {}
+  defaultAction: false
+  enabled: true
+  id: <generated-id>
+  name: Verify Email
+  priority: 50
+  providerId: VERIFY_EMAIL
+  updated: false
+- alias: UPDATE_PROFILE
+  config: {}
+  defaultAction: false
+  enabled: true
+  id: <generated-id>
+  name: Update Profile
+  priority: 40
+  providerId: UPDATE_PROFILE
+  updated: false
+- alias: CONFIGURE_TOTP
+  config: {}
+  defaultAction: false
+  enabled: true
+  id: <generated-id>
+  name: Configure OTP
+  priority: 10
+  providerId: CONFIGURE_TOTP
+  updated: false
+- alias: UPDATE_PASSWORD
+  config: {}
+  defaultAction: false
+  enabled: true
+  id: <generated-id>
+  name: Update Password
+  priority: 30
+  providerId: UPDATE_PASSWORD
+  updated: false
+- alias: TERMS_AND_CONDITIONS
+  config: {}
+  defaultAction: false
+  enabled: false
+  id: <generated-id>
+  name: Terms and Conditions
+  priority: 20
+  providerId: TERMS_AND_CONDITIONS
+  updated: false
+- alias: delete_account
+  config: {}
+  defaultAction: false
+  enabled: false
+  id: <generated-id>
+  name: Delete Account
+  priority: 60
+  providerId: delete_account
+  updated: false
+- alias: delete_credential
+  config: {}
+  defaultAction: false
+  enabled: true
+  id: <generated-id>
+  name: Delete Credential
+  priority: 110
+  providerId: delete_credential
+  updated: false
+- alias: update_user_locale
+  config: {}
+  defaultAction: false
+  enabled: true
+  id: <generated-id>
+  name: Update User Locale
+  priority: 1000
+  providerId: update_user_locale
+  updated: false
+- alias: UPDATE_EMAIL
+  config: {}
+  defaultAction: false
+  enabled: false
+  id: <generated-id>
+  name: Update Email
+  priority: 70
+  providerId: UPDATE_EMAIL
+  updated: false
+- alias: CONFIGURE_RECOVERY_AUTHN_CODES
+  config: {}
+  defaultAction: false
+  enabled: true
+  id: <generated-id>
+  name: Recovery Authentication Codes
+  priority: 130
+  providerId: CONFIGURE_RECOVERY_AUTHN_CODES
+  updated: false
+- alias: webauthn-register
+  config: {}
+  defaultAction: false
+  enabled: true
+  id: <generated-id>
+  name: Webauthn Register
+  priority: 80
+  providerId: webauthn-register
+  updated: false
+- alias: webauthn-register-passwordless
+  config: {}
+  defaultAction: false
+  enabled: true
+  id: <generated-id>
+  name: Webauthn Register Passwordless
+  priority: 90
+  providerId: webauthn-register-passwordless
+  updated: false
+- alias: VERIFY_PROFILE
+  config: {}
+  defaultAction: false
+  enabled: true
+  id: <generated-id>
+  name: Verify Profile
+  priority: 100
+  providerId: VERIFY_PROFILE
+  updated: false
+- alias: idp_link
+  config: {}
+  defaultAction: false
+  enabled: true
+  id: <generated-id>
+  name: Linking Identity Provider
+  priority: 120
+  providerId: idp_link
+  updated: false
+requiredCredentials:
+- formLabel: password
+  input: true
+  secret: true
+  type: password
+  updated: false
+resetCredentialsFlow: <generated-id>
+resetPasswordAllowed: null
+revokeRefreshToken: null
+smtpConfig: {}
+sslRequired: EXTERNAL
+ssoSessionIdleTimeout: 1800
+ssoSessionIdleTimeoutRememberMe: null
+ssoSessionMaxLifespan: 36000
+ssoSessionMaxLifespanRememberMe: null
+supportedLocales: []
+updated: true
+verifyEmail: null
+webAuthnPolicy: null
+webAuthnPolicyPasswordless: null

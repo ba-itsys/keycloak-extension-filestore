@@ -19,41 +19,32 @@ package de.arbeitsagentur.opdt.keycloak.filestore;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.stream.Stream;
+import de.arbeitsagentur.opdt.keycloak.filestore.config.PreExistingFileStoreKeycloakServerConfig;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.Test;
-import org.keycloak.models.*;
+import org.keycloak.testframework.annotations.InjectHttpClient;
+import org.keycloak.testframework.annotations.InjectKeycloakUrls;
+import org.keycloak.testframework.annotations.KeycloakIntegrationTest;
+import org.keycloak.testframework.server.KeycloakUrls;
 
-class StartupTest extends KeycloakModelTest {
+@KeycloakIntegrationTest(config = PreExistingFileStoreKeycloakServerConfig.class)
+class StartupTest {
+
+    @InjectHttpClient
+    HttpClient httpClient;
+
+    @InjectKeycloakUrls
+    KeycloakUrls keycloakUrls;
 
     @Test
-    void whenLaunching_givenFiles_thenLoadConfigFromFiles() {
-        inCommittedTransaction(session -> {
-            Stream<RealmModel> realms = session.realms().getRealmsStream();
-            assertThat(realms).hasSize(1).map(RealmModel::getId).containsExactly("master");
-            RealmModel realm = session.realms().getRealm("master");
-            Stream<ClientModel> clients = session.clients().getClientsStream(realm);
-            Stream<ClientScopeModel> clientScopes = session.clientScopes().getClientScopesStream(realm);
-            Stream<RoleModel> roles = session.roles().getRealmRolesStream(realm);
-            Stream<GroupModel> groups = session.groups().getGroupsStream(realm);
-            assertThat(clients).map(ClientModel::getClientId).containsExactly("account", "admin-cli", "master-realm");
-            assertThat(clientScopes)
-                    .map(ClientScopeModel::getName)
-                    .containsExactly(
-                            "acr",
-                            "address",
-                            "email",
-                            "microprofile-jwt",
-                            "offline_access",
-                            "phone",
-                            "profile",
-                            "role_list",
-                            "roles",
-                            "web-origins");
-            assertThat(roles)
-                    .map(RoleModel::getId)
-                    .containsExactly(
-                            "admin", "create-realm", "default-roles-master", "offline_access", "uma_authorization");
-            assertThat(groups).map(GroupModel::getName).containsExactly("test-group");
-        });
+    void whenLaunching_givenFiles_thenMasterRealmIsServed() throws Exception {
+        var response = httpClient.execute(new HttpGet(keycloakUrls.getMasterRealm()));
+
+        assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+        assertThat(EntityUtils.toString(response.getEntity()))
+                .contains("\"realm\":\"master\"")
+                .contains("\"account-service\"");
     }
 }

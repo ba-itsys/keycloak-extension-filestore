@@ -707,8 +707,8 @@ defaultGroupIds: []
 defaultLocale: de
 defaultRoleId: default-roles-master
 directGrantFlow: defaultDirectGrantFlow
-displayName: OIAM-Keycloak 27.1.13-24.0.3
-displayNameHtml: <div class="kc-logo-text"><span>OIAM-Keycloak 27.1.13-24.0.3</span></div>
+displayName: my realm
+displayNameHtml: <div class="kc-logo-text"><span>my realm</span></div>
 dockerAuthenticationFlow: defaultDockerFlow
 duplicateEmailsAllowed: false
 editUsernameAllowed: false

@@ -20,35 +20,31 @@ package de.arbeitsagentur.opdt.keycloak.filestore.client;
 import static org.assertj.core.api.Assertions.*;
 
 import de.arbeitsagentur.opdt.keycloak.filestore.KeycloakModelTest;
+import de.arbeitsagentur.opdt.keycloak.filestore.config.FileStoreKeycloakServerConfig;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.ClientScopeModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ModelDuplicateException;
+import org.keycloak.testframework.annotations.InjectRealm;
+import org.keycloak.testframework.annotations.KeycloakIntegrationTest;
+import org.keycloak.testframework.injection.LifeCycle;
+import org.keycloak.testframework.realm.ManagedRealm;
+import org.keycloak.testframework.remote.annotations.TestOnServer;
 
-class FileClientProviderTest extends KeycloakModelTest {
+@KeycloakIntegrationTest(config = FileStoreKeycloakServerConfig.class)
+public class FileClientProviderTest extends KeycloakModelTest {
 
     private static final String REALM_ID = "capital";
 
-    @Override
-    protected void createEnvironment(KeycloakSession s) {
-        s.realms().createRealm(REALM_ID);
-    }
+    @InjectRealm(ref = REALM_ID, lifecycle = LifeCycle.METHOD)
+    ManagedRealm managedRealm;
 
-    @Override
-    protected void cleanEnvironment(KeycloakSession s) {
-        s.realms().removeRealm(REALM_ID);
-    }
-
-    @Test
-    void whenGetClientsStream_givenNoClients_thenReturnEmptyStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenGetClientsStream_givenNoClients_thenReturnEmptyStream(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::clients, (clients, realm) -> {
             // Act
             Stream<ClientModel> actual = clients.getClientsStream(realm);
             // Assert
@@ -56,21 +52,21 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = {"unknown"})
-    void whenGetClientById_givenUnknownId_thenReturnNull(String unknownId) {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
-            // Act
-            ClientModel actual = clients.getClientById(realm, unknownId);
-            // Assert
-            assertThat(actual).isNull();
+    @TestOnServer
+    public void whenGetClientById_givenUnknownId_thenReturnNull(KeycloakSession testSession) {
+        nullEmptyAndUnknownStrings().forEach(unknownId -> {
+            withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+                // Act
+                ClientModel actual = clients.getClientById(realm, unknownId);
+                // Assert
+                assertThat(actual).isNull();
+            });
         });
     }
 
-    @Test
-    void whenGetClientById_givenClient_thenReturnNotNull() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenGetClientById_givenClient_thenReturnNotNull(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clients, (clients, realm) -> {
             // Arrange
             clients.addClient(realm, "Nassau");
             // Act
@@ -80,21 +76,33 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = {"unknown"})
-    void whenGetClientByClientId_givenUnknownClientId_thenReturnNull(String unknownClientId) {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
-            // Act
-            ClientModel actual = clients.getClientByClientId(realm, unknownClientId);
-            // Assert
-            assertThat(actual).isNull();
+    @TestOnServer
+    public void whenAddClient_givenExplicitId_thenClientIdIsUsedAsReadableIdentifier(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::clients, (clients, realm) -> {
+            ClientModel actual = clients.addClient(realm, "generated-id", "Readable Client");
+
+            assertThat(actual.getId()).isEqualTo("Readable Client");
+            assertThat(actual.getClientId()).isEqualTo("Readable Client");
+            assertThat(clients.getClientById(realm, "Readable Client")).isNotNull();
+            assertThat(clients.getClientById(realm, "generated-id")).isNull();
         });
     }
 
-    @Test
-    void whenGetClientByClientId_givenExistingClientId_thenReturnClient() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenGetClientByClientId_givenUnknownClientId_thenReturnNull(KeycloakSession testSession) {
+        nullEmptyAndUnknownStrings().forEach(unknownClientId -> {
+            withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+                // Act
+                ClientModel actual = clients.getClientByClientId(realm, unknownClientId);
+                // Assert
+                assertThat(actual).isNull();
+            });
+        });
+    }
+
+    @TestOnServer
+    public void whenGetClientByClientId_givenExistingClientId_thenReturnClient(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clients, (clients, realm) -> {
             // Arrange
             clients.addClient(realm, "London");
             // Act
@@ -104,9 +112,9 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetClientsStream_givenNoClient_thenStreamIsEmpty() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenGetClientsStream_givenNoClient_thenStreamIsEmpty(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::clients, (clients, realm) -> {
             // Act
             Stream<ClientModel> actual = clients.getClientsStream(realm);
             // Assert
@@ -114,9 +122,9 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetClientsStream_givenClients_thenReturnStreamWithClients() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenGetClientsStream_givenClients_thenReturnStreamWithClients(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::clients, (clients, realm) -> {
             // Arrange
             clients.addClient(realm, "London");
             clients.addClient(realm, "Dublin");
@@ -131,9 +139,9 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetClientsStreamWithPagination_givenClients_thenReturnPaginatedStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenGetClientsStreamWithPagination_givenClients_thenReturnPaginatedStream(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clients, (clients, realm) -> {
             // Arrange
             // Note: the list will be sorted alphabetically to get a consistent pagination
             clients.addClient(realm, "Amsterdam");
@@ -152,18 +160,18 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenAddClient_givenNull_thenIllegalArgumentExceptionIsThrown() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenAddClient_givenNull_thenIllegalArgumentExceptionIsThrown(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clients, (clients, realm) -> {
             // Act & Assert
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> clients.addClient(realm, null, null));
         });
     }
 
-    @Test
-    void whenAddClient_givenExistingClient_thenThrowException() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenAddClient_givenExistingClient_thenThrowException(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clients, (clients, realm) -> {
             // Arrange
             clients.addClient(realm, "warsaw", "Hamburg");
             // Act & Assert
@@ -172,9 +180,20 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetAlwaysDisplayInConsoleClientsStream_givenNoClients_thenReturnEmptyStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenAddClient_givenExistingExplicitId_thenThrowException(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::clients, (clients, realm) -> {
+            clients.addClient(realm, "Existing Client");
+
+            assertThatExceptionOfType(ModelDuplicateException.class)
+                    .isThrownBy(() -> clients.addClient(realm, "Existing Client", "Different Client"));
+        });
+    }
+
+    @TestOnServer
+    public void whenGetAlwaysDisplayInConsoleClientsStream_givenNoClients_thenReturnEmptyStream(
+            KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::clients, (clients, realm) -> {
             // Act
             Stream<ClientModel> actual = clients.getAlwaysDisplayInConsoleClientsStream(realm);
             // Assert
@@ -182,9 +201,10 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetAlwaysDisplayInConsoleClientsStream_givenNoMatchingClients_thenReturnEmptyStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenGetAlwaysDisplayInConsoleClientsStream_givenNoMatchingClients_thenReturnEmptyStream(
+            KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::clients, (clients, realm) -> {
             // Arrange
             clients.addClient(realm, "Windhoek").setAlwaysDisplayInConsole(false); // will be excluded
             // Act
@@ -194,9 +214,9 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetAlwaysDisplayInConsoleClientsStream_givenClients_thenReturnStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenGetAlwaysDisplayInConsoleClientsStream_givenClients_thenReturnStream(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::clients, (clients, realm) -> {
             // Arrange
             clients.addClient(realm, "Zagreb").setAlwaysDisplayInConsole(true);
             clients.addClient(realm, "Windhoek").setAlwaysDisplayInConsole(false); // will be excluded
@@ -208,9 +228,9 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetClientsCount_givenNoClients_thenReturnZero() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenGetClientsCount_givenNoClients_thenReturnZero(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::clients, (clients, realm) -> {
             // Act
             long actual = clients.getClientsCount(realm);
             // Assert
@@ -218,9 +238,9 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetClientsCount_givenClients_thenReturnCount() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenGetClientsCount_givenClients_thenReturnCount(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::clients, (clients, realm) -> {
             // Arrange
             clients.addClient(realm, "Vienna");
             clients.addClient(realm, "Rome");
@@ -232,17 +252,17 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenRemoveClients_givenNoClients_thenNoExceptionIsThrown() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenRemoveClients_givenNoClients_thenNoExceptionIsThrown(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::clients, (clients, realm) -> {
             // Act & Assert
             assertThatNoException().isThrownBy(() -> clients.removeClients(realm));
         });
     }
 
-    @Test
-    void whenRemoveClients_givenSingleClient_thenClientIsRemoved() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenRemoveClients_givenSingleClient_thenClientIsRemoved(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::clients, (clients, realm) -> {
             // Arrange
             clients.addClient(realm, "Nairobi");
             // Act
@@ -253,9 +273,9 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenRemoveClients_givenMultipleClients_thenClientIsRemoved() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenRemoveClients_givenMultipleClients_thenClientIsRemoved(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::clients, (clients, realm) -> {
             // Arrange
             clients.addClient(realm, "Madrid");
             clients.addClient(realm, "Lisbon");
@@ -268,21 +288,21 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = {"unknown"})
-    void whenRemoveClient_givenNull_thenReturnFalse(String invalid) {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
-            // Act
-            var actual = clients.removeClient(realm, invalid);
-            // Assert
-            assertThat(actual).isFalse();
+    @TestOnServer
+    public void whenRemoveClient_givenNull_thenReturnFalse(KeycloakSession testSession) {
+        nullEmptyAndUnknownStrings().forEach(invalid -> {
+            withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+                // Act
+                var actual = clients.removeClient(realm, invalid);
+                // Assert
+                assertThat(actual).isFalse();
+            });
         });
     }
 
-    @Test
-    void whenRemoveClient_givenClient_thenReturnTrue() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenRemoveClient_givenClient_thenReturnTrue(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clients, (clients, realm) -> {
             // Arrange
             clients.addClient(realm, "Jakarta");
             // Act
@@ -292,9 +312,9 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenSearchClientsByClientIdStream_givenNoClients_thenReturnEmptyStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenSearchClientsByClientIdStream_givenNoClients_thenReturnEmptyStream(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clients, (clients, realm) -> {
             // Arrange
             clients.addClient(realm, "Toronto"); // no match -> exclude
             clients.addClient(realm, "patty"); // partial match -> exclude
@@ -305,9 +325,9 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenSearchClientsByClientIdStream_givenNullParam_thenReturnEmptyStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenSearchClientsByClientIdStream_givenNullParam_thenReturnEmptyStream(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clients, (clients, realm) -> {
             // Act
             Stream<ClientModel> actual = clients.searchClientsByClientIdStream(realm, null, null, null);
             // Assert
@@ -315,9 +335,9 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenSearchClientsByClientIdStream_givenMatchingClients_thenReturnStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenSearchClientsByClientIdStream_givenMatchingClients_thenReturnStream(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clients, (clients, realm) -> {
             // Arrange
             clients.addClient(realm, "Toronto"); // no match -> exclude
             clients.addClient(realm, "patty"); // partial match -> exclude
@@ -335,9 +355,9 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenSearchClientsByClientIdStream_givenResultLimits_thenReturnStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenSearchClientsByClientIdStream_givenResultLimits_thenReturnStream(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clients, (clients, realm) -> {
             // Arrange
             clients.addClient(realm, "0 pattern");
             clients.addClient(realm, "1 pattern"); // start, firstResult = 1
@@ -350,9 +370,10 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenSearchClientsByClientIdStream_givenOutOfBoundLimits_thenReturnEmptyStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenSearchClientsByClientIdStream_givenOutOfBoundLimits_thenReturnEmptyStream(
+            KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clients, (clients, realm) -> {
             // Arrange
             clients.addClient(realm, "0 pattern");
             // Act
@@ -362,17 +383,17 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenSearchClientsByAttributes_givenNoClients_thenReturnEmptyStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenSearchClientsByAttributes_givenNoClients_thenReturnEmptyStream(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::clients, (clients, realm) -> {
             Stream<ClientModel> actual = clients.searchClientsByAttributes(realm, Map.of(), null, null);
             assertThat(actual).isEmpty();
         });
     }
 
-    @Test
-    void whenSearchClientsByAttributes_givenNoMatch_thenReturnEmptyStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenSearchClientsByAttributes_givenNoMatch_thenReturnEmptyStream(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clients, (clients, realm) -> {
             // Arrange
             clients.addClient(realm, "Vilnius").setAttribute("no-match", "val");
             // Act
@@ -382,9 +403,9 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenSearchClientsByAttributes_givenClients_thenReturnStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenSearchClientsByAttributes_givenClients_thenReturnStream(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clients, (clients, realm) -> {
             // Arrange
             clients.addClient(realm, "Vilnius").setAttribute("no-match", "val");
             clients.addClient(realm, "Zagreb").setAttribute("match", "val");
@@ -396,9 +417,10 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenSearchClientsByAttributes_givenClientWithMultipleAttrs_thenReturnStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenSearchClientsByAttributes_givenClientWithMultipleAttrs_thenReturnStream(
+            KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clients, (clients, realm) -> {
             // Arrange
             var c = clients.addClient(realm, "Vilnius");
             c.setAttribute("no-match", "val");
@@ -410,9 +432,9 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenSearchClientsByAttributes_givenMultipleSearchAttrs_thenReturnStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenSearchClientsByAttributes_givenMultipleSearchAttrs_thenReturnStream(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clients, (clients, realm) -> {
             // Arrange
             clients.addClient(realm, "NO MATCH").setAttribute("match-1", "val");
             var c = clients.addClient(realm, "Tokyo");
@@ -426,9 +448,9 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenAddClientScopes_givenClientScopes_thenNoExceptionIsThrown() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenAddClientScopes_givenClientScopes_thenNoExceptionIsThrown(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
             // Arrange
             var client = session.clients().addClient(realm, "London");
             client.setProtocol("same protocol");
@@ -444,24 +466,24 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenRemoveClientScope_givenNull_thenNoExceptionIsThrown() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenRemoveClientScope_givenNull_thenNoExceptionIsThrown(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
             assertThatNoException().isThrownBy(() -> session.clients().removeClientScope(realm, null, null));
         });
     }
 
-    @Test
-    void whenRemoveClientScope_givenNoClientScope_thenNoExceptionIsThrown() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenRemoveClientScope_givenNoClientScope_thenNoExceptionIsThrown(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
             var c = session.clients().addClient(realm, "Seoul");
             assertThatNoException().isThrownBy(() -> session.clients().removeClientScope(realm, c, null));
         });
     }
 
-    @Test
-    void whenRemoveClientScope_givenClientScope_thenClientScopeIsRemoved() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenRemoveClientScope_givenClientScope_thenClientScopeIsRemoved(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
             // Arrange
             var c = session.clients().addClient(realm, "Seoul");
             var cs = session.clientScopes().addClientScope(realm, "suburb");
@@ -473,9 +495,9 @@ class FileClientProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetAllRedirectUrisOfEnabledClients_givenNoUris_thenReturnEmptyMap() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clients, (clients, realm) -> {
+    @TestOnServer
+    public void whenGetAllRedirectUrisOfEnabledClients_givenNoUris_thenReturnEmptyMap(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::clients, (clients, realm) -> {
             // Act
             var actual = clients.getAllRedirectUrisOfEnabledClients(realm);
             // Assert

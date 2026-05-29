@@ -20,45 +20,41 @@ package de.arbeitsagentur.opdt.keycloak.filestore.clientscope;
 import static org.assertj.core.api.Assertions.*;
 
 import de.arbeitsagentur.opdt.keycloak.filestore.KeycloakModelTest;
+import de.arbeitsagentur.opdt.keycloak.filestore.config.FileStoreKeycloakServerConfig;
 import java.util.Map;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.keycloak.models.ClientScopeModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ModelDuplicateException;
+import org.keycloak.testframework.annotations.InjectRealm;
+import org.keycloak.testframework.annotations.KeycloakIntegrationTest;
+import org.keycloak.testframework.injection.LifeCycle;
+import org.keycloak.testframework.realm.ManagedRealm;
+import org.keycloak.testframework.remote.annotations.TestOnServer;
 
-class FileClientScopeProviderTest extends KeycloakModelTest {
+@KeycloakIntegrationTest(config = FileStoreKeycloakServerConfig.class)
+public class FileClientScopeProviderTest extends KeycloakModelTest {
 
     private static final String REALM_ID = "desert";
 
-    @Override
-    protected void createEnvironment(KeycloakSession s) {
-        s.realms().createRealm(REALM_ID);
-    }
+    @InjectRealm(ref = REALM_ID, lifecycle = LifeCycle.METHOD)
+    ManagedRealm managedRealm;
 
-    @Override
-    protected void cleanEnvironment(KeycloakSession s) {
-        s.realms().removeRealm(REALM_ID);
-    }
-
-    @ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = {"unknown"})
-    void whenGetClientScopeById_givenUnknownId_thenReturnNull(String invalidId) {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clientScopes, (clientScopes, realm) -> {
-            // Act
-            ClientScopeModel actual = clientScopes.getClientScopeById(realm, invalidId);
-            // Assert
-            assertThat(actual).isNull();
+    @TestOnServer
+    public void whenGetClientScopeById_givenUnknownId_thenReturnNull(KeycloakSession testSession) {
+        nullEmptyAndUnknownStrings().forEach(invalidId -> {
+            withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clientScopes, (clientScopes, realm) -> {
+                // Act
+                ClientScopeModel actual = clientScopes.getClientScopeById(realm, invalidId);
+                // Assert
+                assertThat(actual).isNull();
+            });
         });
     }
 
-    @Test
-    void whenGetClientScopeById_givenExistingId_thenReturnNotNull() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clientScopes, (clientScopes, realm) -> {
+    @TestOnServer
+    public void whenGetClientScopeById_givenExistingId_thenReturnNotNull(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clientScopes, (clientScopes, realm) -> {
             // Arrange
             clientScopes.addClientScope(realm, "Kalahari");
             // Act
@@ -68,9 +64,9 @@ class FileClientScopeProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetClientScopesStream_givenNoScopes_thenReturnEmptyStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clientScopes, (clientScopes, realm) -> {
+    @TestOnServer
+    public void whenGetClientScopesStream_givenNoScopes_thenReturnEmptyStream(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::clientScopes, (clientScopes, realm) -> {
             // Act
             Stream<ClientScopeModel> actual = clientScopes.getClientScopesStream(realm);
             // Assert
@@ -78,9 +74,9 @@ class FileClientScopeProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetClientScopesStream_givenClientScopes_thenReturnStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clientScopes, (cs, realm) -> {
+    @TestOnServer
+    public void whenGetClientScopesStream_givenClientScopes_thenReturnStream(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::clientScopes, (cs, realm) -> {
             // Arrange
             cs.addClientScope(realm, "Sahara");
             cs.addClientScope(realm, "Kalahari");
@@ -95,18 +91,18 @@ class FileClientScopeProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenAddClientScope_givenNull_then() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clientScopes, (clientScopes, realm) -> {
+    @TestOnServer
+    public void whenAddClientScope_givenNull_then(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clientScopes, (clientScopes, realm) -> {
             // Act && Arrange
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> clientScopes.addClientScope(realm, null));
         });
     }
 
-    @Test
-    void whenAddClientScope_givenExistingId_thenThrowException() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clientScopes, (clientScope, realm) -> {
+    @TestOnServer
+    public void whenAddClientScope_givenExistingId_thenThrowException(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clientScopes, (clientScope, realm) -> {
             // Arrange
             clientScope.addClientScope(realm, "Atacama");
             // Act & Assert
@@ -115,21 +111,21 @@ class FileClientScopeProviderTest extends KeycloakModelTest {
         });
     }
 
-    @ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = {"unknown"})
-    void whenRemoveClientScope_givenNull_thenReturnFalse(String invalidId) {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clientScopes, (clientScopes, realm) -> {
-            // Act
-            boolean actual = clientScopes.removeClientScope(realm, invalidId);
-            // Assert
-            assertThat(actual).isFalse();
+    @TestOnServer
+    public void whenRemoveClientScope_givenNull_thenReturnFalse(KeycloakSession testSession) {
+        nullEmptyAndUnknownStrings().forEach(invalidId -> {
+            withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clientScopes, (clientScopes, realm) -> {
+                // Act
+                boolean actual = clientScopes.removeClientScope(realm, invalidId);
+                // Assert
+                assertThat(actual).isFalse();
+            });
         });
     }
 
-    @Test
-    void whenRemoveClientScope_givenScope_thenReturnTrue() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clientScopes, (clientScopes, realm) -> {
+    @TestOnServer
+    public void whenRemoveClientScope_givenScope_thenReturnTrue(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::clientScopes, (clientScopes, realm) -> {
             // Arrange
             clientScopes.addClientScope(realm, "Sonora");
             // Act
@@ -139,18 +135,18 @@ class FileClientScopeProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenRemoveClientScopes_givenNoScopes_thenNoExceptionIsThrown() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clientScopes, (clientScopes, realm) -> {
+    @TestOnServer
+    public void whenRemoveClientScopes_givenNoScopes_thenNoExceptionIsThrown(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::clientScopes, (clientScopes, realm) -> {
             // Act & Assert
             assertThat(clientScopes.getClientScopesStream(realm)).isEmpty();
             assertThatNoException().isThrownBy(() -> clientScopes.removeClientScopes(realm));
         });
     }
 
-    @Test
-    void whenRemoveClientScopes_givenScopes_thenScopesAreEmpty() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clientScopes, (clientScopes, realm) -> {
+    @TestOnServer
+    public void whenRemoveClientScopes_givenScopes_thenScopesAreEmpty(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::clientScopes, (clientScopes, realm) -> {
             // Arrange
             clientScopes.addClientScope(realm, "Thar");
             clientScopes.addClientScope(realm, "Namib");
@@ -162,9 +158,9 @@ class FileClientScopeProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetClientScopesByProtocol_givenClientScopes_thenReturnStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clientScopes, (cs, realm) -> {
+    @TestOnServer
+    public void whenGetClientScopesByProtocol_givenClientScopes_thenReturnStream(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::clientScopes, (cs, realm) -> {
             // Arrange
             cs.addClientScope(realm, "Sahara").setProtocol("openid-connect");
             cs.addClientScope(realm, "Kalahari").setProtocol("openid-connect");
@@ -179,9 +175,9 @@ class FileClientScopeProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetClientScopesByAttributes_givenClientScopes_thenReturnStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::clientScopes, (cs, realm) -> {
+    @TestOnServer
+    public void whenGetClientScopesByAttributes_givenClientScopes_thenReturnStream(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::clientScopes, (cs, realm) -> {
             // Arrange
             Map<String, String> searchMap = Map.of("testKey1", "testVal1", "testKey2", "testVal2");
             Map<String, String> searchMap2 = Map.of("testKey3", "testVal3", "testKey2", "testVal2");

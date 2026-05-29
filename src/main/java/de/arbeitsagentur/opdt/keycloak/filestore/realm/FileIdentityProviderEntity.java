@@ -35,6 +35,7 @@ public class FileIdentityProviderEntity implements AbstractEntity, UpdatableEnti
     private String firstBrokerLoginFlowId;
     private String postBrokerLoginFlowId;
     private String organizationId;
+    private Boolean hideOnLogin = false;
     private Boolean enabled = false;
     private Boolean trustEmail = false;
     private Boolean storeToken = false;
@@ -59,6 +60,7 @@ public class FileIdentityProviderEntity implements AbstractEntity, UpdatableEnti
         entity.setLinkOnly(model.isLinkOnly());
         entity.setAddReadTokenRoleOnCreate(model.isAddReadTokenRoleOnCreate());
         entity.setAuthenticateByDefault(model.isAuthenticateByDefault());
+        entity.setHideOnLogin(model.isHideOnLogin());
         entity.setConfig(model.getConfig());
         entity.setOrganizationId(model.getOrganizationId());
         return entity;
@@ -86,6 +88,7 @@ public class FileIdentityProviderEntity implements AbstractEntity, UpdatableEnti
         model.setAddReadTokenRoleOnCreate(addReadTokenRoleOnCreate == null ? false : addReadTokenRoleOnCreate);
         Boolean authenticateByDefault = entity.isAuthenticateByDefault();
         model.setAuthenticateByDefault(authenticateByDefault == null ? false : authenticateByDefault);
+        model.setHideOnLogin(entity.isHideOnLogin());
         Map<String, String> config = entity.getConfig();
         model.setConfig(config == null ? new HashMap<>() : new HashMap<>(config));
         model.setOrganizationId(entity.getOrganizationId());
@@ -228,6 +231,18 @@ public class FileIdentityProviderEntity implements AbstractEntity, UpdatableEnti
 
     public Boolean getAuthenticateByDefault() {
         return authenticateByDefault;
+    }
+
+    public Boolean isHideOnLogin() {
+        return hideOnLogin;
+    }
+
+    public void setHideOnLogin(Boolean hideOnLogin) {
+        this.hideOnLogin = hideOnLogin;
+    }
+
+    public Boolean getHideOnLogin() {
+        return hideOnLogin;
     }
 
     public String getOrganizationId() {

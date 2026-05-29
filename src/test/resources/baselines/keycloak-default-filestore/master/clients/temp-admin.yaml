@@ -1,0 +1,53 @@
+alwaysDisplayInConsole: false
+attributes:
+  client.use.lightweight.access.token.enabled: 'true'
+  is_temporary_admin: 'true'
+authenticationFlowBindingOverrides: {}
+baseUrl: null
+bearerOnly: false
+clientAuthenticatorType: client-secret
+clientId: temp-admin
+clientScopes:
+  web-origins: true
+  service_account: true
+  acr: true
+  address: false
+  phone: false
+  profile: true
+  roles: true
+  offline_access: false
+  microprofile-jwt: false
+  basic: true
+  email: true
+consentRequired: false
+description: null
+directAccessGrantsEnabled: false
+enabled: true
+frontchannelLogout: false
+fullScopeAllowed: true
+id: temp-admin
+implicitFlowEnabled: false
+managementUrl: null
+multiValueAttributes:
+  client.use.lightweight.access.token.enabled:
+  - 'true'
+  is_temporary_admin:
+  - 'true'
+name: null
+nodeReRegistrationTimeout: -1
+notBefore: 0
+protocol: openid-connect
+protocolMappers: []
+publicClient: false
+realmId: master
+redirectUris: []
+registrationToken: null
+rootUrl: null
+scope: []
+scopeMappings: []
+secret: <generated-secret>
+serviceAccountsEnabled: true
+standardFlowEnabled: false
+surrogateAuthRequired: false
+updated: false
+webOrigins: []

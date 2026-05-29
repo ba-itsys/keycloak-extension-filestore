@@ -184,7 +184,7 @@ public class FileIdentityProviderStorageProvider implements IdentityProviderStor
 
     @Override
     public void updateMapper(IdentityProviderMapperModel model) {
-        createMapper(model);
+        getRealm().updateIdentityProviderMapper(model);
     }
 
     @Override

@@ -21,42 +21,39 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import de.arbeitsagentur.opdt.keycloak.filestore.KeycloakModelTest;
+import de.arbeitsagentur.opdt.keycloak.filestore.config.FileStoreKeycloakServerConfig;
 import java.util.List;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ModelDuplicateException;
 import org.keycloak.models.RoleModel;
+import org.keycloak.testframework.annotations.InjectRealm;
+import org.keycloak.testframework.annotations.KeycloakIntegrationTest;
+import org.keycloak.testframework.injection.LifeCycle;
+import org.keycloak.testframework.realm.ManagedRealm;
+import org.keycloak.testframework.remote.annotations.TestOnServer;
 
-class FileRoleProviderTest extends KeycloakModelTest {
+@KeycloakIntegrationTest(config = FileStoreKeycloakServerConfig.class)
+public class FileRoleProviderTest extends KeycloakModelTest {
 
     private static final String REALM_ID = "house";
 
-    @Override
-    protected void createEnvironment(KeycloakSession s) {
-        s.realms().createRealm(REALM_ID);
-    }
+    @InjectRealm(ref = REALM_ID, lifecycle = LifeCycle.METHOD)
+    ManagedRealm managedRealm;
 
-    @Override
-    protected void cleanEnvironment(KeycloakSession s) {
-        s.realms().removeRealm(REALM_ID);
-    }
-
-    @ParameterizedTest
-    @NullAndEmptySource
-    void whenAddRealmRole_givenInvalidName_thenThrowException(String invalid) {
-        withRealmAndProvider(REALM_ID, KeycloakSession::roles, (roles, realm) -> {
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> roles.addRealmRole(realm, invalid));
+    @TestOnServer
+    public void whenAddRealmRole_givenInvalidName_thenThrowException(KeycloakSession testSession) {
+        nullAndEmptyStrings().forEach(invalid -> {
+            withRealmAndProvider(testSession, REALM_ID, KeycloakSession::roles, (roles, realm) -> {
+                assertThatExceptionOfType(IllegalArgumentException.class)
+                        .isThrownBy(() -> roles.addRealmRole(realm, invalid));
+            });
         });
     }
 
-    @Test
-    void whenAddRealmRole_givenExistingId_thenThrowException() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::roles, (roles, realm) -> {
+    @TestOnServer
+    public void whenAddRealmRole_givenExistingId_thenThrowException(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::roles, (roles, realm) -> {
             // Arrange
             roles.addRealmRole(realm, "garden", "tree");
             // Act & Assert
@@ -65,9 +62,9 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenAddRealmRole_givenExistingName_thenThrowException() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::roles, (roles, realm) -> {
+    @TestOnServer
+    public void whenAddRealmRole_givenExistingName_thenThrowException(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::roles, (roles, realm) -> {
             // Arrange
             roles.addRealmRole(realm, "garden");
             // Act & Assert
@@ -76,20 +73,21 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @ParameterizedTest
-    @NullAndEmptySource
-    void whenGetClientRole_givenInvalidParam_thenReturnNull(String invalid) {
-        withRealmAndProvider(REALM_ID, KeycloakSession::roles, (roles, realm) -> {
-            // Act
-            var actual = roles.getClientRole(null, invalid);
-            // Assert
-            assertThat(actual).isNull();
+    @TestOnServer
+    public void whenGetClientRole_givenInvalidParam_thenReturnNull(KeycloakSession testSession) {
+        nullAndEmptyStrings().forEach(invalid -> {
+            withRealmAndProvider(testSession, REALM_ID, KeycloakSession::roles, (roles, realm) -> {
+                // Act
+                var actual = roles.getClientRole(null, invalid);
+                // Assert
+                assertThat(actual).isNull();
+            });
         });
     }
 
-    @Test
-    void whenGetRealmRolesStream_givenNoRoles_thenReturnEmptyStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::roles, (roles, realm) -> {
+    @TestOnServer
+    public void whenGetRealmRolesStream_givenNoRoles_thenReturnEmptyStream(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::roles, (roles, realm) -> {
             // Act
             var actual = roles.getRealmRolesStream(realm);
             // Assert
@@ -97,9 +95,9 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetRealmRolesStream_givenRoles_thenReturnStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::roles, (roles, realm) -> {
+    @TestOnServer
+    public void whenGetRealmRolesStream_givenRoles_thenReturnStream(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::roles, (roles, realm) -> {
             // Arrange
             roles.addRealmRole(realm, "porch");
             roles.addRealmRole(realm, "garden");
@@ -110,9 +108,9 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetRolesStream_givenNoRoles_thenReturnEmptyStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::roles, (roles, realm) -> {
+    @TestOnServer
+    public void whenGetRolesStream_givenNoRoles_thenReturnEmptyStream(KeycloakSession testSession) {
+        withCleanRealmAndProvider(testSession, KeycloakSession::roles, (roles, realm) -> {
             // Act
             var actual = roles.getRolesStream(realm, Stream.of(), null, null, null);
             // Assert
@@ -120,9 +118,9 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetRolesStream_givenRoles_thenReturnStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::roles, (roles, realm) -> {
+    @TestOnServer
+    public void whenGetRolesStream_givenRoles_thenReturnStream(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::roles, (roles, realm) -> {
             // Arrange
             roles.addRealmRole(realm, "kitchen");
             roles.addRealmRole(realm, "attic");
@@ -133,9 +131,9 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetRolesStream_givenSearchPattern_thenReturnStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::roles, (roles, realm) -> {
+    @TestOnServer
+    public void whenGetRolesStream_givenSearchPattern_thenReturnStream(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::roles, (roles, realm) -> {
             // Arrange
             roles.addRealmRole(realm, "no-match"); // no-match > exclude
             roles.addRealmRole(realm, "patty"); // partial-match > exclude
@@ -154,9 +152,9 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenAddClientRole_givenClient_thenNameIsSet() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenAddClientRole_givenClient_thenNameIsSet(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
             // Arrange
             var client = session.clients().addClient(realm, "dog");
             // Act
@@ -166,19 +164,20 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @ParameterizedTest
-    @NullAndEmptySource
-    void whenAddClientRole_givenInvalidName_thenExceptionIsThrown(String invalid) {
-        withRealm(REALM_ID, (session, realm) -> {
-            // Act & Assert
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> session.roles().addClientRole(null, invalid));
+    @TestOnServer
+    public void whenAddClientRole_givenInvalidName_thenExceptionIsThrown(KeycloakSession testSession) {
+        nullAndEmptyStrings().forEach(invalid -> {
+            withRealm(testSession, REALM_ID, (session, realm) -> {
+                // Act & Assert
+                assertThatExceptionOfType(IllegalArgumentException.class)
+                        .isThrownBy(() -> session.roles().addClientRole(null, invalid));
+            });
         });
     }
 
-    @Test
-    void whenAddClientRole_givenExistingClient_thenExceptionIsThrown() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenAddClientRole_givenExistingClient_thenExceptionIsThrown(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
             // Arrange
             var client = session.clients().addClient(realm, "dog");
             session.roles().addClientRole(client, "pet");
@@ -188,9 +187,9 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenAddClientRole_givenExistingRole_thenExceptionIsThrown() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenAddClientRole_givenExistingRole_thenExceptionIsThrown(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
             // Arrange
             var client = session.clients().addClient(realm, "dog");
             session.roles().addRealmRole(realm, "dog:pet");
@@ -200,9 +199,9 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenAddClientRole_givenIdNull_thenIdIsSet() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenAddClientRole_givenIdNull_thenIdIsSet(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
             // Arrange
             var client = session.clients().addClient(realm, "jar");
             // Act
@@ -212,9 +211,9 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenAddClientRole_givenId_thenIdIsSet() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenAddClientRole_givenId_thenIdIsSet(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
             // Arrange
             var client = session.clients().addClient(realm, "dog");
             // Act
@@ -224,9 +223,9 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetClientRolesStream_givenNoRoles_thenReturnEmptyStream() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenGetClientRolesStream_givenNoRoles_thenReturnEmptyStream(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
             // Arrange
             var client = session.clients().addClient(realm, "cat");
             // Act
@@ -236,9 +235,9 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetClientRolesStream_givenRoles_thenReturnStream() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenGetClientRolesStream_givenRoles_thenReturnStream(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
             // Arrange
             var client = session.clients().addClient(realm, "cat");
             session.roles().addClientRole(client, "pet");
@@ -250,9 +249,9 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenGetClientRolesStream_givenPagination_thenReturnStream() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenGetClientRolesStream_givenPagination_thenReturnStream(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
             // Arrange
             var client = session.clients().addClient(realm, "cat");
             session.roles().addClientRole(client, "0");
@@ -266,9 +265,9 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenRemoveRole_givenRealmRole_thenRoleIsRemoved() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenRemoveRole_givenRealmRole_thenRoleIsRemoved(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
             // Arrange
             var role = session.roles().addRealmRole(realm, "living-room");
             // Act
@@ -279,9 +278,9 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenRemoveRole_givenClientRole_thenRoleIsRemoved() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenRemoveRole_givenClientRole_thenRoleIsRemoved(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
             // Arrange
             var client = session.clients().addClient(realm, "cat");
             var role = session.roles().addClientRole(client, "alive");
@@ -293,9 +292,9 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenRemoveRoles_givenNoRealmsRoles_thenRolesAreEmpty() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenRemoveRoles_givenNoRealmsRoles_thenRolesAreEmpty(KeycloakSession testSession) {
+        withCleanRealm(testSession, (session, realm) -> {
             // Act
             session.roles().removeRoles(realm);
             // Assert
@@ -304,9 +303,9 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenRemoveRoles_givenRealmRoles_thenRolesAreEmpty() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenRemoveRoles_givenRealmRoles_thenRolesAreEmpty(KeycloakSession testSession) {
+        withCleanRealm(testSession, (session, realm) -> {
             // Arrange
             session.roles().addRealmRole(realm, "bed");
             session.roles().addRealmRole(realm, "pillow");
@@ -319,9 +318,9 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenRemoveRoles_givenNoClientRoles_thenRolesAreEmpty() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenRemoveRoles_givenNoClientRoles_thenRolesAreEmpty(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
             // Arrange
             var client = session.clients().addClient(realm, "guest-room");
             // Act
@@ -332,9 +331,9 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenRemoveRoles_givenClientRoles_thenRolesAreEmpty() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenRemoveRoles_givenClientRoles_thenRolesAreEmpty(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
             // Arrange
             var client = session.clients().addClient(realm, "guest-room");
             session.roles().addClientRole(client, "table");
@@ -347,20 +346,21 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @ParameterizedTest
-    @NullAndEmptySource
-    void whenGetRealmRole_givenInvalidName_thenReturnNull(String invalid) {
-        withRealmAndProvider(REALM_ID, KeycloakSession::roles, (roles, realm) -> {
-            // Act
-            var actual = roles.getRealmRole(realm, invalid);
-            // Assert
-            assertThat(actual).isNull();
+    @TestOnServer
+    public void whenGetRealmRole_givenInvalidName_thenReturnNull(KeycloakSession testSession) {
+        nullAndEmptyStrings().forEach(invalid -> {
+            withRealmAndProvider(testSession, REALM_ID, KeycloakSession::roles, (roles, realm) -> {
+                // Act
+                var actual = roles.getRealmRole(realm, invalid);
+                // Assert
+                assertThat(actual).isNull();
+            });
         });
     }
 
-    @Test
-    void whenGetRealmRole_givenNoRole_thenReturnNull() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::roles, (roles, realm) -> {
+    @TestOnServer
+    public void whenGetRealmRole_givenNoRole_thenReturnNull(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::roles, (roles, realm) -> {
             // Act
             var actual = roles.getRealmRole(realm, "abc");
             // Assert
@@ -368,21 +368,21 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = {"unknown"})
-    void whenGetRoleById_givenInvalidParam_thenReturnNull(String invalid) {
-        withRealmAndProvider(REALM_ID, KeycloakSession::roles, (roles, realm) -> {
-            // Act
-            var actual = roles.getRoleById(realm, invalid);
-            // Assert
-            assertThat(actual).isNull();
+    @TestOnServer
+    public void whenGetRoleById_givenInvalidParam_thenReturnNull(KeycloakSession testSession) {
+        nullEmptyAndUnknownStrings().forEach(invalid -> {
+            withRealmAndProvider(testSession, REALM_ID, KeycloakSession::roles, (roles, realm) -> {
+                // Act
+                var actual = roles.getRoleById(realm, invalid);
+                // Assert
+                assertThat(actual).isNull();
+            });
         });
     }
 
-    @Test
-    void whenGetRoleById_givenExistingId_thenReturnRole() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::roles, (roles, realm) -> {
+    @TestOnServer
+    public void whenGetRoleById_givenExistingId_thenReturnRole(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::roles, (roles, realm) -> {
             roles.addRealmRole(realm, "freezer");
             // Act
             var actual = roles.getRoleById(realm, "freezer");
@@ -391,21 +391,21 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = {"unknown"})
-    void whenSearchForRolesStream_givenInvalidSearch_thenReturnEmptyStream(String invalid) {
-        withRealmAndProvider(REALM_ID, KeycloakSession::roles, (roles, realm) -> {
-            // Act
-            var actual = roles.searchForRolesStream(realm, invalid, null, null);
-            // Assert
-            assertThat(actual).isEmpty();
+    @TestOnServer
+    public void whenSearchForRolesStream_givenInvalidSearch_thenReturnEmptyStream(KeycloakSession testSession) {
+        nullEmptyAndUnknownStrings().forEach(invalid -> {
+            withCleanRealmAndProvider(testSession, KeycloakSession::roles, (roles, realm) -> {
+                // Act
+                var actual = roles.searchForRolesStream(realm, invalid, null, null);
+                // Assert
+                assertThat(actual).isEmpty();
+            });
         });
     }
 
-    @Test
-    void whenSearchForRolesStream_givenSearchString_thenReturnStream() {
-        withRealmAndProvider(REALM_ID, KeycloakSession::roles, (roles, realm) -> {
+    @TestOnServer
+    public void whenSearchForRolesStream_givenSearchString_thenReturnStream(KeycloakSession testSession) {
+        withRealmAndProvider(testSession, REALM_ID, KeycloakSession::roles, (roles, realm) -> {
             roles.addRealmRole(realm, "patty"); // partial match -> exclude
             roles.addRealmRole(realm, "no-match"); // no match -> exclude
             roles.addRealmRole(realm, "abc-pattern");
@@ -422,9 +422,9 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenSearchForClientRolesStream_givenSearchString_thenReturnStream() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenSearchForClientRolesStream_givenSearchString_thenReturnStream(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
             // Arrange
             var client = session.clients().addClient(realm, "bathtub");
 
@@ -444,9 +444,9 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenSearchForClientRolesStream_givenSearchNull_thenReturnEmptyStream() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenSearchForClientRolesStream_givenSearchNull_thenReturnEmptyStream(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
             // Act
             var actual = session.roles().searchForClientRolesStream(realm, Stream.of(), null, null, null);
             // Assert
@@ -454,9 +454,9 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenSearchForClientRolesStream_givenIds_thenReturnStream() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenSearchForClientRolesStream_givenIds_thenReturnStream(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
             // Arrange
             var ids = List.of(
                     "bathtub:patty", // partial match -> exclude
@@ -479,9 +479,10 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenSearchForClientRolesStream_givenSearchNullAndExcludedIds_thenReturnEmptyStream() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenSearchForClientRolesStream_givenSearchNullAndExcludedIds_thenReturnEmptyStream(
+            KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
             // Act
             var actual = session.roles().searchForClientRolesStream(realm, null, Stream.of(), null, null);
             // Assert
@@ -489,9 +490,9 @@ class FileRoleProviderTest extends KeycloakModelTest {
         });
     }
 
-    @Test
-    void whenSearchForClientRolesStream_givenExcludedIds_thenReturnStream() {
-        withRealm(REALM_ID, (session, realm) -> {
+    @TestOnServer
+    public void whenSearchForClientRolesStream_givenExcludedIds_thenReturnStream(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
             // Arrange
             var ids = List.of(
                     "patty", // partial match -> exclude

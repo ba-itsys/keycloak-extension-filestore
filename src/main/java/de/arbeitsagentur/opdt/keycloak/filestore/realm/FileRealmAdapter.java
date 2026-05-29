@@ -1120,6 +1120,7 @@ public class FileRealmAdapter extends AbstractRealmModel<FileRealmEntity> implem
                         oldPS.setLinkOnly(identityProvider.isLinkOnly());
                         oldPS.setAddReadTokenRoleOnCreate(identityProvider.isAddReadTokenRoleOnCreate());
                         oldPS.setAuthenticateByDefault(identityProvider.isAuthenticateByDefault());
+                        oldPS.setHideOnLogin(identityProvider.isHideOnLogin());
                         oldPS.setConfig(
                                 identityProvider.getConfig() == null
                                         ? null
