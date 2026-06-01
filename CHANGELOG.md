@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.3.0](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v2.2.1...v2.3.0) (2026-06-01)
+
+
+### Features
+
+* migrate to new keycloak testframework ([292f527](https://github.com/ba-itsys/keycloak-extension-filestore/commit/292f527db9ed8320a882bf96ccdb4ffd2e441c5f))
+
+
+### Dependencies
+
+* **deps-dev:** bump com.diffplug.spotless:spotless-maven-plugin ([c108cf1](https://github.com/ba-itsys/keycloak-extension-filestore/commit/c108cf1077c070c11ef9b1693801adb3251d7b85))
+* **deps-dev:** bump org.apache.maven.plugins:maven-surefire-plugin ([3c8ecb2](https://github.com/ba-itsys/keycloak-extension-filestore/commit/3c8ecb2ae0f213e8ca0cdc66512f27a80c584fe4))
+
 ## [2.2.1](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v2.2.0...v2.2.1) (2026-05-26)
 
 
