@@ -52,16 +52,18 @@ Run the check with:
 mvn -Dtest=DefaultRealmBaselineTest test
 ```
 
-If it fails during a Keycloak version update, inspect the reported file and the git diff. The comparison
-normalizes generated ids, generated key material, and YAML indentation, so reported differences should be
-semantic changes in the default filestore. A `keycloak-version.txt` mismatch is expected when comparing a
-new Keycloak version against an older accepted baseline; content changes in files such as `master.yaml`
-show what changed.
+The test only fails when the generated default content actually changes (a changed file, or an added or
+removed file). A Keycloak version bump on its own does **not** fail it: `keycloak-version.txt` is treated as
+metadata that records which version last produced the baseline, and its value is not compared. So a routine
+version update where Keycloak did not change any defaults keeps both this test and a full `mvn test` green
+with no regeneration needed.
 
-While an older baseline is intentionally kept for review, a full `mvn test` run is expected to fail on this
-test. After the changed defaults are accepted, regenerate the baseline so the full suite is green again.
+If it does fail during a Keycloak version update, inspect the reported file and the git diff. The comparison
+normalizes generated ids, generated key material, and YAML indentation, so reported differences are
+semantic changes in the default filestore; content changes in files such as `master.yaml` show what changed.
 
-After reviewing and accepting the changes, update the checked-in baseline with:
+Regenerate the baseline only after such a change has been reviewed and accepted. Update the checked-in
+baseline with:
 
 ```shell
 mvn -Dtest=DefaultRealmBaselineTest -Dkeycloak.default-realm-baseline.update=true test
