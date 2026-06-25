@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.3.1](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v2.3.0...v2.3.1) (2026-06-25)
+
+
+### Bug Fixes
+
+* update to kc26.6.3, make sure updates without changing configs dont fail ([a11e495](https://github.com/ba-itsys/keycloak-extension-filestore/commit/a11e49519f4ca04f7404b4fc5a317263a1f240a4))
+
+
+### Dependencies
+
+* **deps-dev:** bump com.diffplug.spotless:spotless-maven-plugin ([183cc26](https://github.com/ba-itsys/keycloak-extension-filestore/commit/183cc26fc9e630ab48230bf0c2fe243ca2597eeb))
+* **deps:** bump org.jacoco:jacoco-maven-plugin from 0.8.14 to 0.8.15 ([9e082b3](https://github.com/ba-itsys/keycloak-extension-filestore/commit/9e082b32ca9fbf70cd5908009e5437f020384518))
+* **deps:** bump org.sonatype.central:central-publishing-maven-plugin ([2bd88b6](https://github.com/ba-itsys/keycloak-extension-filestore/commit/2bd88b66d41d782cf6e53fc4a9b7ec0f23246994))
+
 ## [2.3.0](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v2.2.1...v2.3.0) (2026-06-01)
 
 
