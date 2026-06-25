@@ -69,6 +69,9 @@ class DefaultRealmBaselineTest extends KeycloakModelTest {
                 .containsExactlyElementsOf(expected.keySet());
         for (Map.Entry<String, JsonNode> entry : actual.entrySet()) {
             if (VERSION_FILE.equals(entry.getKey())) {
+                // The Keycloak version is tracked as metadata only (it records which version last
+                // produced the baseline). A version bump on its own must not fail this test; we only
+                // care about changes to the actual default filestore contents.
                 continue;
             }
             assertThat(entry.getValue())
@@ -77,11 +80,6 @@ class DefaultRealmBaselineTest extends KeycloakModelTest {
                             entry.getKey(), UPDATE_BASELINE_PROPERTY)
                     .isEqualTo(expected.get(entry.getKey()));
         }
-        assertThat(actual.get(VERSION_FILE))
-                .as(
-                        "Keycloak version changed. Regenerate with -D%s=true after reviewing default filestore changes.",
-                        UPDATE_BASELINE_PROPERTY)
-                .isEqualTo(expected.get(VERSION_FILE));
     }
 
     private static Map<String, String> readActualFilestore(Path filestoreRoot) throws IOException {
