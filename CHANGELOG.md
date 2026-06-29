@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.2](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v2.3.1...v2.3.2) (2026-06-29)
+
+
+### Dependencies
+
+* **deps:** bump keycloak.version from 26.6.3 to 26.6.4 ([1f77969](https://github.com/ba-itsys/keycloak-extension-filestore/commit/1f77969ebffe7122d32f92735c255a3ded4bee86))
+
 ## [2.3.1](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v2.3.0...v2.3.1) (2026-06-25)
 
 
