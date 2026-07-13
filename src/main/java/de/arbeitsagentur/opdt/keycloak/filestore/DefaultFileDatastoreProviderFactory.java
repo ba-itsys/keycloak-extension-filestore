@@ -19,6 +19,7 @@ package de.arbeitsagentur.opdt.keycloak.filestore;
 
 import com.google.auto.service.AutoService;
 import org.keycloak.Config;
+import org.keycloak.common.Profile;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.storage.DatastoreProvider;
@@ -35,7 +36,12 @@ public class DefaultFileDatastoreProviderFactory implements DatastoreProviderFac
     public void init(Config.Scope config) {}
 
     @Override
-    public void postInit(KeycloakSessionFactory factory) {}
+    public void postInit(KeycloakSessionFactory factory) {
+        if (!Profile.isFeatureEnabled(Profile.Feature.STATELESS)) {
+            throw new IllegalStateException(
+                    "The file datastore requires the 'stateless' feature. Start Keycloak with --features=stateless.");
+        }
+    }
 
     @Override
     public void close() {}

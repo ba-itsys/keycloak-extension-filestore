@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import org.keycloak.common.Profile;
+import org.keycloak.testframework.infinispan.CacheType;
 import org.keycloak.testframework.server.KeycloakServerConfig;
 import org.keycloak.testframework.server.KeycloakServerConfigBuilder;
 
@@ -36,11 +37,12 @@ public class PreExistingFileStoreKeycloakServerConfig implements KeycloakServerC
     protected KeycloakServerConfigBuilder configure(KeycloakServerConfigBuilder config, Path sourceDir) {
         copyPreExistingFilestore(sourceDir);
         return FileStoreKeycloakServerConfig.currentProjectDependency(config)
+                .features(Profile.Feature.STATELESS)
+                .cache(CacheType.LOCAL)
                 .featuresDisabled(Profile.Feature.AUTHORIZATION, Profile.Feature.ORGANIZATION)
                 .option("feature-admin-fine-grained-authz", "disabled")
                 .option("spi-datastore--provider", "file")
-                .option("spi-map-storage--file--dir", KeycloakModelTest.FIXTURE_TEST_FILESTORE_DIR)
-                .spiOption("realm", "jpa", "enabled", "false");
+                .option("spi-map-storage--file--dir", KeycloakModelTest.FIXTURE_TEST_FILESTORE_DIR);
     }
 
     protected static void copyPreExistingFilestore(Path source) {

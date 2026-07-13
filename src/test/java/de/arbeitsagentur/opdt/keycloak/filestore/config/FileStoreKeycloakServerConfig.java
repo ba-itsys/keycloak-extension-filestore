@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import org.keycloak.common.Profile;
+import org.keycloak.testframework.infinispan.CacheType;
 import org.keycloak.testframework.server.KeycloakServerConfig;
 import org.keycloak.testframework.server.KeycloakServerConfigBuilder;
 
@@ -31,12 +32,16 @@ public class FileStoreKeycloakServerConfig implements KeycloakServerConfig {
     @Override
     public KeycloakServerConfigBuilder configure(KeycloakServerConfigBuilder config) {
         cleanTestFilestoreDirectory();
+        // Select the file datastore + the required stateless feature with an embedded LOCAL cache.
+        // The realm/jpa, realm-cache, authorization-cache and organization/infinispan disables are
+        // supplied automatically by FileStoreConfigDefaultsSourceFactory, so a green run exercises it.
         return currentProjectDependency(config)
+                .features(Profile.Feature.STATELESS)
+                .cache(CacheType.LOCAL)
                 .featuresDisabled(Profile.Feature.AUTHORIZATION, Profile.Feature.ORGANIZATION)
                 .option("feature-admin-fine-grained-authz", "disabled")
                 .option("spi-datastore--provider", "file")
-                .option("spi-map-storage--file--dir", KeycloakModelTest.TEST_FILESTORE_DIR)
-                .spiOption("realm", "jpa", "enabled", "false");
+                .option("spi-map-storage--file--dir", KeycloakModelTest.TEST_FILESTORE_DIR);
     }
 
     static KeycloakServerConfigBuilder currentProjectDependency(KeycloakServerConfigBuilder config) {
