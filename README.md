@@ -3,11 +3,41 @@
 
 # keycloak-extension-filestore
 
-Implements client, clientscope, group, realm, role file-based storage.
+Implements client, clientscope, group, realm, role and identity-provider file-based storage.
 Initially forked from Keycloak's own experimental version.
 
-Intended to be used in read-only filesystems, for example mounted K8s-configmaps (but can also be used to interactively create the configuration by using the admin console)
-To use this, you most likely have to implement your own `DatastoreProvider` and mix it with a different implementation to store users, sessions etc.
+Intended to be used in read-only filesystems, for example mounted K8s-configmaps (but can also be used to interactively create the configuration by using the admin console).
+
+The extension provides its own `DatastoreProvider` that serves the **config areas** (realms, clients, client scopes, roles, groups, identity providers) from files. Everything it does not serve — users, sessions, and other dynamic state — falls through to Keycloak's default storage, so it is normally combined with a store for those areas (see [Pairing with a dynamic store](#pairing-with-a-dynamic-store)).
+
+Requires **Keycloak 26.7.0** or newer.
+
+## How to use
+
+- Put the JAR in Keycloak's `providers` folder.
+- Select the file datastore with `--spi-datastore--provider=file` and enable the required preview feature with `--features=stateless`.
+- Point the extension at the filestore directory with `--spi-map-storage--file--dir=<path>` (for example a mounted, read-only ConfigMap).
+
+Once `file` is the selected datastore, the extension automatically disables the SPI providers that would otherwise shadow the file-backed config stores (the JPA realm provider and the realm / authorization / organization caches), so you no longer need to set those disables by hand. Features that are not supported still have to be turned off manually (see [Caveats](#caveats)).
+
+| CLI-Parameter | Description |
+|---------------|-------------|
+| --spi-datastore--provider=file | Required — select the file datastore |
+| --features=stateless | Required — keeps only an embedded local cache; moves dynamic state to the datastore |
+| --spi-map-storage--file--dir=<path> | Directory the config files are read from / written to |
+| --spi-datastore--file--resources-version-seed=<seed> | Optional — pins the theme `/resources/{tag}/` cache-buster to a stable value across replicas (recommended for rolling updates without a relational database) |
+| --features-disabled=authorization,admin-fine-grained-authz,organization | Disable unsupported features |
+
+### Pairing with a dynamic store
+
+Because filestore only serves config areas, pair it with a store for users and sessions. The [Cassandra extension](https://github.com/opdt/keycloak-cassandra-extension) follows the same activation patterns and composes directly: `file` stays the selected datastore and serves its config areas, while Cassandra serves the areas listed for it:
+
+```
+--spi-datastore--provider=file
+--spi-datastore--cassandra--areas=user,user-session,auth-session,login-failure,single-use-object,revoked-token
+```
+
+With no relational database in that setup, this extension's deployment-state provider owns the theme resources tag (derive it deterministically with `--spi-datastore--file--resources-version-seed`).
 
 # Caveats
 
