@@ -781,6 +781,7 @@ components:
   updated: false
 defaultClientScopeIds:
 - role_list
+- AuthnContextClassRef
 - profile
 - email
 - roles
@@ -862,7 +863,7 @@ requiredActionProviders:
   enabled: true
   id: <generated-id>
   name: Configure OTP
-  priority: 10
+  priority: 54
   providerId: CONFIGURE_TOTP
   updated: false
 - alias: UPDATE_PASSWORD
@@ -871,7 +872,7 @@ requiredActionProviders:
   enabled: true
   id: <generated-id>
   name: Update Password
-  priority: 30
+  priority: 57
   providerId: UPDATE_PASSWORD
   updated: false
 - alias: TERMS_AND_CONDITIONS
