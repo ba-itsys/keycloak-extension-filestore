@@ -28,9 +28,13 @@ Once `file` is the selected datastore, the extension automatically disables the 
 | --spi-datastore--file--resources-version-seed=<seed> | Optional — pins the theme `/resources/{tag}/` cache-buster to a stable value across replicas (recommended for rolling updates without a relational database) |
 | --features-disabled=authorization,admin-fine-grained-authz,organization | Disable unsupported features |
 
-### Pairing with a dynamic store
+### Pairing with a store for users and sessions
 
-Because filestore only serves config areas, pair it with a store for users and sessions. The [Cassandra extension](https://github.com/opdt/keycloak-cassandra-extension) follows the same activation patterns and composes directly: `file` stays the selected datastore and serves its config areas, while Cassandra serves the areas listed for it:
+Filestore only serves the config areas; everything it does not serve falls through to Keycloak's default storage, so users and sessions come from whatever store is configured for them.
+
+**Default: relational database (JPA).** No extra extension is needed — the usual JPA-backed user and session storage keeps working alongside filestore. Only the JPA *realm* provider is turned off (filestore owns realms); the JPA connection and the JPA user/session providers are untouched. This is the simplest setup: files for config, your database for users and sessions.
+
+**Fully database-free: the Cassandra extension.** To drop the relational database entirely, pair with the [Cassandra extension](https://github.com/opdt/keycloak-cassandra-extension), which follows the same activation patterns. `file` stays the selected datastore and serves its config areas, while Cassandra serves the areas listed for it:
 
 ```
 --spi-datastore--provider=file
