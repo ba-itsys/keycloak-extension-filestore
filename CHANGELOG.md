@@ -1,5 +1,22 @@
 # Changelog
 
+## [3.0.0](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v2.3.2...v3.0.0) (2026-07-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* require Keycloak 26.7.0 with stateless and self-configure the datastore
+
+### Features
+
+* require Keycloak 26.7.0 with stateless and self-configure the datastore ([95a90bd](https://github.com/ba-itsys/keycloak-extension-filestore/commit/95a90bdcaec1573a16b94d2b6b715ec1a8a31d08))
+
+
+### Dependencies
+
+* **deps-dev:** bump com.diffplug.spotless:spotless-maven-plugin ([98d6800](https://github.com/ba-itsys/keycloak-extension-filestore/commit/98d680025705fff5942e42c2116c4daa176a977a))
+* **deps-dev:** bump junit.jupiter.version from 6.1.0 to 6.1.1 ([8c38a40](https://github.com/ba-itsys/keycloak-extension-filestore/commit/8c38a40b20791231c5ebe7c1a4171ae0806c9191))
+
 ## [2.3.2](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v2.3.1...v2.3.2) (2026-06-29)
 
 
