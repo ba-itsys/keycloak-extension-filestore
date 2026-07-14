@@ -21,7 +21,7 @@
 
   <groupId>de.arbeitsagentur.opdt</groupId>
   <artifactId>keycloak-extension-filestore</artifactId>
-  <version>3.0.0</version>
+  <version>3.0.1-SNAPSHOT</version>
 
   <name>keycloak-extension-filestore</name>
   <description>Keycloak-DatastoreProvider storing data in file system</description>
