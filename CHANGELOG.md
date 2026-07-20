@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v3.0.0...v3.0.1) (2026-07-20)
+
+
+### Dependencies
+
+* **deps-dev:** bump junit.jupiter.version from 6.1.1 to 6.1.2 ([78bbe6e](https://github.com/ba-itsys/keycloak-extension-filestore/commit/78bbe6ea1f6ab80f7bb5a95ed34b812aaf504138))
+
 ## [3.0.0](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v2.3.2...v3.0.0) (2026-07-14)
 
 
