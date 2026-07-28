@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.0.2](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v3.0.1...v3.0.2) (2026-07-28)
+
+
+### Bug Fixes
+
+* persist the realm file when nested entities are updated in place ([75e186e](https://github.com/ba-itsys/keycloak-extension-filestore/commit/75e186e773f0fde5f05b8220dad9d6df670cea2a))
+
+
+### Dependencies
+
+* **deps-dev:** bump org.apache.maven.plugins:maven-jar-plugin ([92b8083](https://github.com/ba-itsys/keycloak-extension-filestore/commit/92b8083ef0f217a8d9bef83bf8846ade3dd523fa))
+
 ## [3.0.1](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v3.0.0...v3.0.1) (2026-07-20)
 
 
