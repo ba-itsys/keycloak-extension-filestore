@@ -541,6 +541,17 @@ public class FileRealmAdapter extends AbstractRealmModel<FileRealmEntity> implem
         entity.addRequiredCredential(FileRequiredCredentialEntity.fromModel(model));
     }
 
+    /**
+     * Persists the realm file after a nested entity was mutated in place. The nested entities
+     * (components, flows, executions, configs, identity providers, mappers, credentials, client
+     * initial accesses) have no reference to their realm: mutating them through their own setters
+     * does not go through a {@link FileRealmEntity} write-through setter, so nothing writes the
+     * realm file and the change is lost on the next restart.
+     */
+    private void persistRealm() {
+        FileRealmStore.update(entity);
+    }
+
     @Override
     public void updateRequiredCredentials(Set<String> credentials) {
         Set<FileRequiredCredentialEntity> requiredCredentialEntities = new HashSet<>(entity.getRequiredCredentials());
@@ -563,6 +574,7 @@ public class FileRealmAdapter extends AbstractRealmModel<FileRealmEntity> implem
                 })
                 .map(FileRequiredCredentialEntity::fromModel)
                 .forEach(updateCredentialFnc);
+        persistRealm();
     }
 
     private void updateRequiredCredential(
@@ -811,6 +823,7 @@ public class FileRealmAdapter extends AbstractRealmModel<FileRealmEntity> implem
             existing.setProviderId(model.getProviderId());
             existing.setBuiltIn(model.isBuiltIn());
             existing.setTopLevel(model.isTopLevel());
+            persistRealm();
         });
     }
 
@@ -865,6 +878,7 @@ public class FileRealmAdapter extends AbstractRealmModel<FileRealmEntity> implem
             existing.setRequirement(model.getRequirement());
             existing.setAutheticatorFlow(model.isAuthenticatorFlow());
             existing.setPriority(model.getPriority());
+            persistRealm();
         });
     }
 
@@ -895,6 +909,7 @@ public class FileRealmAdapter extends AbstractRealmModel<FileRealmEntity> implem
         entity.getAuthenticatorConfig(model.getId()).ifPresent(oldAC -> {
             oldAC.setAlias(model.getAlias());
             oldAC.setConfig(model.getConfig());
+            persistRealm();
         });
     }
 
@@ -954,6 +969,7 @@ public class FileRealmAdapter extends AbstractRealmModel<FileRealmEntity> implem
             oldAC.setAlias(model.getAlias());
             oldAC.setProviderId(model.getProviderId());
             oldAC.setConfig(model.getConfig());
+            persistRealm();
         });
     }
 
@@ -996,6 +1012,7 @@ public class FileRealmAdapter extends AbstractRealmModel<FileRealmEntity> implem
             oldRAP.setEnabled(model.isEnabled());
             oldRAP.setDefaultAction(model.isDefaultAction());
             oldRAP.setConfig(model.getConfig());
+            persistRealm();
         });
     }
 
@@ -1125,6 +1142,7 @@ public class FileRealmAdapter extends AbstractRealmModel<FileRealmEntity> implem
                                 identityProvider.getConfig() == null
                                         ? null
                                         : new HashMap<>(identityProvider.getConfig()));
+                        persistRealm();
                     });
             session.getKeycloakSessionFactory().publish(new IdentityProviderUpdatedEvent() {
 
@@ -1184,6 +1202,7 @@ public class FileRealmAdapter extends AbstractRealmModel<FileRealmEntity> implem
             oldIPM.setIdentityProviderAlias(model.getIdentityProviderAlias());
             oldIPM.setIdentityProviderMapper(model.getIdentityProviderMapper());
             oldIPM.setConfig(model.getConfig());
+            persistRealm();
         });
     }
 
@@ -1250,6 +1269,7 @@ public class FileRealmAdapter extends AbstractRealmModel<FileRealmEntity> implem
         entity.getComponent(component.getId()).ifPresent(existing -> {
             ComponentModel oldModel = FileComponentEntity.toModel(existing);
             updateComponent(existing, component);
+            persistRealm();
             ComponentUtil.notifyUpdated(session, this, oldModel, component);
         });
     }
@@ -1873,8 +1893,10 @@ public class FileRealmAdapter extends AbstractRealmModel<FileRealmEntity> implem
 
     @Override
     public void decreaseRemainingCount(ClientInitialAccessModel model) {
-        entity.getClientInitialAccess(model.getId())
-                .ifPresent(cia -> cia.setRemainingCount(model.getRemainingCount() - 1));
+        entity.getClientInitialAccess(model.getId()).ifPresent(cia -> {
+            cia.setRemainingCount(model.getRemainingCount() - 1);
+            persistRealm();
+        });
     }
 
     @Override
