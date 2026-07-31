@@ -24,21 +24,23 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Run tests
-        run: mvn test
-
-      #- name: Create Jacoco report
-      #  run: mvn -f ./core org.jacoco:jacoco-maven-plugin:0.8.8:report -Djacoco.dataFile="$(readlink -f ./tests/target/jacoco.exec)"
+      - name: Build and Test
+        run: mvn --batch-mode --no-transfer-progress verify
 
       - name: Cache SonarCloud packages
+        if: github.actor != 'dependabot[bot]' # skip for dependabot PRs
         uses: actions/cache@v6
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      - name: Build and analyze
+      - name: SonarCloud Scan
+        if: github.actor != 'dependabot[bot]' # skip for dependabot PRs
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: "mvn -B verify --no-transfer-progress" # org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=opdt_keycloak-extension-filestore
+        run: >
+          mvn --batch-mode --no-transfer-progress
+          org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+          -Dsonar.organization=ba-itsys
+          -Dsonar.projectKey=ba-itsys_keycloak-extension-filestore
