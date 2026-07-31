@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.3](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v3.0.2...v3.0.3) (2026-07-31)
+
+
+### Bug Fixes
+
+* allow conditional area overrides ([77bd680](https://github.com/ba-itsys/keycloak-extension-filestore/commit/77bd680f5cc1d2040c555c9c8c5b235e51d6c0bb))
+
 ## [3.0.2](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v3.0.1...v3.0.2) (2026-07-28)
 
 
