@@ -48,15 +48,22 @@ public class FileStoreConfigDefaultsSourceFactory implements ConfigSourceFactory
 
     /**
      * The SPI providers that would otherwise shadow the file-backed config stores: the built-in JPA
-     * realm provider (a stray model-event listener) and the realm / authorization / organization
-     * caches (which never observe out-of-band file edits, and whose organization variant delegates
-     * to the empty JPA store). Each is defaulted to disabled only when unset.
+     * config-store providers (they tie with the file providers in the default-provider election and
+     * cannot work without their database), the realm / authorization / organization caches (which
+     * never observe out-of-band file edits, and whose organization variant delegates to the empty
+     * JPA store) and the infinispan idp cache (which cannot work without the realm cache). Each is
+     * defaulted to disabled only when unset.
      */
     private static final List<String> PROVIDER_DISABLES = List.of(
             "kc.spi-realm--jpa--enabled",
+            "kc.spi-client--jpa--enabled",
+            "kc.spi-client-scope--jpa--enabled",
+            "kc.spi-group--jpa--enabled",
+            "kc.spi-role--jpa--enabled",
             "kc.spi-realm-cache--default--enabled",
             "kc.spi-authorization-cache--default--enabled",
-            "kc.spi-organization--infinispan--enabled");
+            "kc.spi-organization--infinispan--enabled",
+            "kc.spi-identity-provider-storage--infinispan--enabled");
 
     /**
      * Below every Keycloak config source (persisted build values = 200, {@code keycloak.conf} = 299,

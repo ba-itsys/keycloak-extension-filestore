@@ -16,17 +16,21 @@
  */
 package de.arbeitsagentur.opdt.keycloak.filestore.common;
 
+import static org.keycloak.userprofile.DeclarativeUserProfileProviderFactory.PROVIDER_PRIORITY;
+
 import java.util.concurrent.atomic.AtomicInteger;
 import org.jboss.logging.Logger;
+import org.keycloak.Config;
 import org.keycloak.Config.Scope;
 import org.keycloak.component.AmphibianProviderFactory;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
+import org.keycloak.provider.EnvironmentDependentProviderFactory;
 import org.keycloak.provider.InvalidationHandler;
 import org.keycloak.provider.Provider;
 
 public abstract class AbstractFileProviderFactory<T extends Provider, V extends AbstractEntity, M>
-        implements AmphibianProviderFactory<T> {
+        implements AmphibianProviderFactory<T>, EnvironmentDependentProviderFactory {
 
     public static final String PROVIDER_ID = "file";
 
@@ -84,6 +88,24 @@ public abstract class AbstractFileProviderFactory<T extends Provider, V extends 
     @Override
     public String getId() {
         return PROVIDER_ID;
+    }
+
+    /**
+     * Makes the file providers eligible for the default-provider election (Keycloak only elects
+     * factories with an order above 0). The built-in jpa providers carry the same order and are
+     * disabled by {@code FileStoreConfigDefaultsSourceFactory}, so the file providers win
+     * uncontested. Contributed datastore extensions (e.g. the cassandra areas at order 2) can take
+     * over an SPI or route it per realm.
+     */
+    @Override
+    public int order() {
+        return PROVIDER_PRIORITY;
+    }
+
+    /** Registered only when the file datastore is selected, so the jar alone never shadows anything. */
+    @Override
+    public boolean isSupported(Scope config) {
+        return PROVIDER_ID.equals(Config.getProvider("datastore"));
     }
 
     @Override
