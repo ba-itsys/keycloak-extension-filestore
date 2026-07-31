@@ -21,6 +21,13 @@ import org.keycloak.models.*;
 import org.keycloak.storage.MigrationManager;
 import org.keycloak.storage.datastore.DefaultDatastoreProvider;
 
+/**
+ * Resolves the config-store SPIs through the default-provider election instead of pinning the file
+ * providers by id. The built-in jpa providers and caches are disabled (see {@code
+ * FileStoreConfigDefaultsSourceFactory}), so the file factories win the election when nothing else
+ * contributes. A higher-order extension (e.g. a cassandra area) can take over an SPI, or route it
+ * per realm and fall back to the file provider.
+ */
 public class DefaultFileDatastoreProvider extends DefaultDatastoreProvider {
     private KeycloakSession session;
 
@@ -31,7 +38,7 @@ public class DefaultFileDatastoreProvider extends DefaultDatastoreProvider {
 
     @Override
     public ClientProvider clients() {
-        return session.getProvider(ClientProvider.class, "file");
+        return session.getProvider(ClientProvider.class);
     }
 
     @Override
@@ -41,7 +48,7 @@ public class DefaultFileDatastoreProvider extends DefaultDatastoreProvider {
 
     @Override
     public ClientScopeProvider clientScopes() {
-        return session.getProvider(ClientScopeProvider.class, "file");
+        return session.getProvider(ClientScopeProvider.class);
     }
 
     @Override
@@ -51,7 +58,7 @@ public class DefaultFileDatastoreProvider extends DefaultDatastoreProvider {
 
     @Override
     public GroupProvider groups() {
-        return session.getProvider(GroupProvider.class, "file");
+        return session.getProvider(GroupProvider.class);
     }
 
     @Override
@@ -61,12 +68,12 @@ public class DefaultFileDatastoreProvider extends DefaultDatastoreProvider {
 
     @Override
     public RealmProvider realms() {
-        return session.getProvider(RealmProvider.class, "file");
+        return session.getProvider(RealmProvider.class);
     }
 
     @Override
     public RoleProvider roles() {
-        return session.getProvider(RoleProvider.class, "file");
+        return session.getProvider(RoleProvider.class);
     }
 
     @Override
@@ -76,7 +83,7 @@ public class DefaultFileDatastoreProvider extends DefaultDatastoreProvider {
 
     @Override
     public IdentityProviderStorageProvider identityProviders() {
-        return session.getProvider(IdentityProviderStorageProvider.class, "file");
+        return session.getProvider(IdentityProviderStorageProvider.class);
     }
 
     @Override
