@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.0.4](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v3.0.3...v3.0.4) (2026-08-17)
+
+
+### Dependencies
+
+* **deps-dev:** bump com.diffplug.spotless:spotless-maven-plugin ([4e12a43](https://github.com/ba-itsys/keycloak-extension-filestore/commit/4e12a43548e461b0ddd44052906789ef1f2d0c7c))
+* **deps-dev:** bump junit.jupiter.version from 6.1.2 to 6.1.3 ([38be47b](https://github.com/ba-itsys/keycloak-extension-filestore/commit/38be47bb9816931e4aedfe51368590be159086a8))
+* **deps:** bump keycloak.version from 26.7.0 to 26.7.1 ([51262b7](https://github.com/ba-itsys/keycloak-extension-filestore/commit/51262b756e896639da643a45b83f40c2d39a346a))
+
 ## [3.0.3](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v3.0.2...v3.0.3) (2026-07-31)
 
 
