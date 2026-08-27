@@ -948,6 +948,7 @@ webAuthnPolicy:
   createTimeout: 0
   extraOrigins: []
   requireResidentKey: not specified
+  residentKey: not specified
   rpEntityName: keycloak
   rpId: ''
   signatureAlgorithms:
@@ -962,6 +963,7 @@ webAuthnPolicyPasswordless:
   createTimeout: 0
   extraOrigins: []
   requireResidentKey: not specified
+  residentKey: not specified
   rpEntityName: keycloak
   rpId: ''
   signatureAlgorithms:
