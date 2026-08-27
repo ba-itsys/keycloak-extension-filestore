@@ -33,6 +33,7 @@ public class FileWebAuthnPolicyEntity implements UpdatableEntity {
     private String attestationConveyancePreference;
     private String authenticatorAttachment;
     private String requireResidentKey;
+    private String residentKey;
     private String userVerificationRequirement;
     private Integer createTimeout;
     private Boolean avoidSameAuthenticatorRegister = false;
@@ -48,6 +49,7 @@ public class FileWebAuthnPolicyEntity implements UpdatableEntity {
         entity.setAttestationConveyancePreference(model.getAttestationConveyancePreference());
         entity.setAuthenticatorAttachment(model.getAuthenticatorAttachment());
         entity.setRequireResidentKey(model.getRequireResidentKey());
+        entity.setResidentKey(model.getResidentKey());
         entity.setUserVerificationRequirement(model.getUserVerificationRequirement());
         entity.setCreateTimeout(model.getCreateTimeout());
         entity.setAvoidSameAuthenticatorRegister(model.isAvoidSameAuthenticatorRegister());
@@ -65,6 +67,7 @@ public class FileWebAuthnPolicyEntity implements UpdatableEntity {
         model.setAttestationConveyancePreference(entity.getAttestationConveyancePreference());
         model.setAuthenticatorAttachment(entity.getAuthenticatorAttachment());
         model.setRequireResidentKey(entity.getRequireResidentKey());
+        model.setResidentKey(entity.getResidentKey());
         model.setUserVerificationRequirement(entity.getUserVerificationRequirement());
         model.setCreateTimeout(entity.getCreateTimeout());
         model.setAvoidSameAuthenticatorRegister(entity.isAvoidSameAuthenticatorRegister());
@@ -84,6 +87,7 @@ public class FileWebAuthnPolicyEntity implements UpdatableEntity {
         entity.setAttestationConveyancePreference(Constants.DEFAULT_WEBAUTHN_POLICY_NOT_SPECIFIED);
         entity.setAuthenticatorAttachment(Constants.DEFAULT_WEBAUTHN_POLICY_NOT_SPECIFIED);
         entity.setRequireResidentKey(Constants.DEFAULT_WEBAUTHN_POLICY_NOT_SPECIFIED);
+        entity.setResidentKey(Constants.DEFAULT_WEBAUTHN_POLICY_NOT_SPECIFIED);
         entity.setUserVerificationRequirement(Constants.DEFAULT_WEBAUTHN_POLICY_NOT_SPECIFIED);
         entity.setCreateTimeout(0);
         entity.setAvoidSameAuthenticatorRegister(false);
@@ -142,6 +146,14 @@ public class FileWebAuthnPolicyEntity implements UpdatableEntity {
 
     public void setRequireResidentKey(String requireResidentKey) {
         this.requireResidentKey = requireResidentKey;
+    }
+
+    public String getResidentKey() {
+        return this.residentKey;
+    }
+
+    public void setResidentKey(String residentKey) {
+        this.residentKey = residentKey;
     }
 
     public String getUserVerificationRequirement() {
