@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.1.0](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v3.0.4...v3.1.0) (2026-08-27)
+
+
+### Features
+
+* add residentKey to FileWebAuthnPolicyEntity ([519b818](https://github.com/ba-itsys/keycloak-extension-filestore/commit/519b81865da5c197ad07ae8c546ac8bc2bf30656))
+
+
+### Dependencies
+
+* **deps-dev:** bump com.diffplug.spotless:spotless-maven-plugin ([f00a107](https://github.com/ba-itsys/keycloak-extension-filestore/commit/f00a107bd6b9a78a939b9d07f5052217e163f446))
+
 ## [3.0.4](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v3.0.3...v3.0.4) (2026-08-17)
 
 
