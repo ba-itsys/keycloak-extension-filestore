@@ -12,14 +12,14 @@ create the configuration by using the admin console).
 The extension provides its own `DatastoreProvider` that serves the **config areas** (realms, clients, client scopes,
 roles, groups, identity providers) from files. Everything it does not serve — users, sessions, and other dynamic state —
 falls through to Keycloak's default storage, so it is normally combined with a store for those areas
-(see [Pairing with a dynamic store](#pairing-with-a-dynamic-store)).
+(see [Pairing with a store for users and sessions](#pairing-with-a-store-for-users-and-sessions)).
 
-Requires **Keycloak 26.7.0** or newer.
+Requires **Keycloak 26.8.0** or newer.
 
 ## How to use
 
 - Put the JAR in Keycloak's `providers` folder.
-- Select the file datastore with `--spi-datastore--provider=file` and enable the required preview feature with
+- Select the file datastore with `--spi-datastore--provider=file` and enable the required `stateless` feature with
   `--features=stateless`.
 - Point the extension at the filestore directory with `--spi-map-storage--file--dir=<path>` (for example a mounted,
   read-only ConfigMap).
@@ -32,7 +32,8 @@ you no longer need to set those disables by hand. Features that are not supporte
 | CLI-Parameter                                                           | Description                                                                                                                                                  |
 |-------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | --spi-datastore--provider=file                                          | Required — select the file datastore                                                                                                                         |
-| --features=stateless                                                    | Required — keeps only an embedded local cache; moves dynamic state to the datastore                                                                          |
+| --features=stateless                                                    | Required — stores sessions and other dynamic state in the datastore instead of Infinispan                                                                    |
+| --cache-embedded-cluster-name=<unique-name>                             | Required unless `--cache=local` — any name except the default `ISPN`, unique per deployment                                                                  |
 | --spi-map-storage--file--dir=<path>                                     | Directory the config files are read from / written to                                                                                                        |
 | --spi-datastore--file--resources-version-seed=<seed>                    | Optional — pins the theme `/resources/{tag}/` cache-buster to a stable value across replicas (recommended for rolling updates without a relational database) |
 | --features-disabled=authorization,admin-fine-grained-authz,organization | Disable unsupported features                                                                                                                                 |
