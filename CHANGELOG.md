@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.0](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v3.1.2...v3.2.0) (2026-10-19)
+
+
+### Features
+
+* update to Keycloak 26.8.1 ([7b13278](https://github.com/ba-itsys/keycloak-extension-filestore/commit/7b132785ee990b4c3a4e63e1e8d1b5b62ec162fe))
+
 ## [3.1.2](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v3.1.1...v3.1.2) (2026-09-25)
 
 
