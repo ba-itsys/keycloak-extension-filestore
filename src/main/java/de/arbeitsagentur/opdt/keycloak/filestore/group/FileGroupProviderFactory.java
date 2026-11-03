@@ -56,8 +56,9 @@ public class FileGroupProviderFactory
             RealmModel realm = (RealmModel) params[0];
             GroupModel group = (GroupModel) params[1];
             realm.removeDefaultGroup(group);
-            group.getSubGroupsStream().collect(Collectors.toSet()).forEach(subGroup -> create(session)
-                    .removeGroup(realm, subGroup));
+            group.getSubGroupsStream()
+                    .collect(Collectors.toSet())
+                    .forEach(subGroup -> create(session).removeGroup(realm, subGroup));
         } else if (type == GROUP_AFTER_REMOVE) {
             session.getKeycloakSessionFactory().publish(new GroupModel.GroupRemovedEvent() {
                 @Override
