@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.2.1](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v3.2.0...v3.2.1) (2026-11-03)
+
+
+### Dependencies
+
+* **deps-dev:** bump com.diffplug.spotless:spotless-maven-plugin ([82fd269](https://github.com/ba-itsys/keycloak-extension-filestore/commit/82fd269cc5d366fc56bc9cd0c73619d3cba04386))
+* **deps-dev:** bump org.apache.maven.plugins:maven-surefire-plugin ([276af0f](https://github.com/ba-itsys/keycloak-extension-filestore/commit/276af0f269a182b0bb2ff774b09fa23c37aedecd))
+* **deps:** bump org.jacoco:jacoco-maven-plugin from 0.8.15 to 0.8.16 ([12dd6dd](https://github.com/ba-itsys/keycloak-extension-filestore/commit/12dd6ddc8ec03a23169b90d31c8a3e5debe8c641))
+
 ## [3.2.0](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v3.1.2...v3.2.0) (2026-10-19)
 
 
