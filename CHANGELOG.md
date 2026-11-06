@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.2](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v3.2.1...v3.2.2) (2026-11-06)
+
+
+### Dependencies
+
+* **deps-dev:** bump com.diffplug.spotless:spotless-maven-plugin ([5a58175](https://github.com/ba-itsys/keycloak-extension-filestore/commit/5a581758af8d44c0ebc95e606e16a752d4fc36d3))
+
 ## [3.2.1](https://github.com/ba-itsys/keycloak-extension-filestore/compare/v3.2.0...v3.2.1) (2026-11-03)
 
 
