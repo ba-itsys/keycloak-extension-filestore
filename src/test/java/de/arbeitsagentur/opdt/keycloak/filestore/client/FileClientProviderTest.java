@@ -467,6 +467,45 @@ public class FileClientProviderTest extends KeycloakModelTest {
     }
 
     @TestOnServer
+    public void whenAddClientScopes_givenOpenIdConnectClient_thenOid4vcClientScopeIsAccepted(
+            KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
+            // Arrange
+            var client = session.clients().addClient(realm, "Lisbon");
+            client.setProtocol("openid-connect");
+            var oidcScope = session.clientScopes().addClientScope(realm, "oidc-scope");
+            oidcScope.setProtocol("openid-connect");
+            var credentialScope = session.clientScopes().addClientScope(realm, "credential-scope");
+            credentialScope.setProtocol("oid4vc");
+            var samlScope = session.clientScopes().addClientScope(realm, "saml-scope");
+            samlScope.setProtocol("saml");
+            // Act
+            session.clients().addClientScopes(realm, client, Set.of(oidcScope, credentialScope, samlScope), false);
+            // Assert
+            Map<String, ClientScopeModel> actual = session.clients().getClientScopes(realm, client, false);
+            assertThat(actual).containsKeys("oidc-scope", "credential-scope").doesNotContainKey("saml-scope");
+        });
+    }
+
+    @TestOnServer
+    public void whenAddClientScopes_givenSamlClient_thenOid4vcClientScopeIsRejected(KeycloakSession testSession) {
+        withRealm(testSession, REALM_ID, (session, realm) -> {
+            // Arrange
+            var client = session.clients().addClient(realm, "Porto");
+            client.setProtocol("saml");
+            var samlScope = session.clientScopes().addClientScope(realm, "saml-scope");
+            samlScope.setProtocol("saml");
+            var credentialScope = session.clientScopes().addClientScope(realm, "credential-scope");
+            credentialScope.setProtocol("oid4vc");
+            // Act
+            session.clients().addClientScopes(realm, client, Set.of(samlScope, credentialScope), false);
+            // Assert
+            Map<String, ClientScopeModel> actual = session.clients().getClientScopes(realm, client, false);
+            assertThat(actual).containsKey("saml-scope").doesNotContainKey("credential-scope");
+        });
+    }
+
+    @TestOnServer
     public void whenRemoveClientScope_givenNull_thenNoExceptionIsThrown(KeycloakSession testSession) {
         withRealm(testSession, REALM_ID, (session, realm) -> {
             assertThatNoException().isThrownBy(() -> session.clients().removeClientScope(realm, null, null));
