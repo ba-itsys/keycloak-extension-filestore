@@ -32,6 +32,7 @@ import java.util.stream.Stream;
 import org.jboss.logging.Logger;
 import org.keycloak.models.*;
 import org.keycloak.models.ClientModel.ClientUpdatedEvent;
+import org.keycloak.models.utils.KeycloakModelUtils;
 
 public class FileClientProvider implements ClientProvider {
 
@@ -258,15 +259,17 @@ public class FileClientProvider implements ClientProvider {
         FileClientEntity entity = FileClientStore.read(id, realm.getId());
         if (entity == null) return;
 
-        // Defaults to openid-connect
-        String clientProtocol = client.getProtocol() == null ? "openid-connect" : client.getProtocol();
         LOG.tracef(
                 "addClientScopes(%s, %s, %s, %b)%s", realm, client, clientScopes, defaultScope, getShortStackTrace());
         Map<String, ClientScopeModel> existingClientScopes = getClientScopes(realm, client, true);
         existingClientScopes.putAll(getClientScopes(realm, client, false));
         clientScopes.stream()
                 .filter(clientScope -> !existingClientScopes.containsKey(clientScope.getName()))
-                .filter(clientScope -> Objects.equals(clientScope.getProtocol(), clientProtocol))
+                .filter(clientScope -> {
+                    // As in the JPA store, a client scope without a protocol becomes an OpenID Connect scope
+                    if (clientScope.getProtocol() == null) clientScope.setProtocol("openid-connect");
+                    return acceptsClientScope(client, clientScope);
+                })
                 .forEach(clientScope -> entity.setClientScope(clientScope.getId(), defaultScope));
     }
 
@@ -289,19 +292,23 @@ public class FileClientProvider implements ClientProvider {
                 .forEach(client -> client.setClientScope(clientScope.getId(), defaultClientScope));
     }
 
+    /** OpenID Connect clients also accept OID4VC credential scopes, as in the JPA store. */
+    private static boolean acceptsClientScope(ClientModel client, ClientScopeModel clientScope) {
+        return clientScope.getProtocol() != null
+                && KeycloakModelUtils.getAcceptedClientScopeProtocols(client).contains(clientScope.getProtocol());
+    }
+
     @Override
     public Map<String, ClientScopeModel> getClientScopes(RealmModel realm, ClientModel client, boolean defaultScopes) {
         final String id = client.getId();
         FileClientEntity entity = FileClientStore.read(id, realm.getId());
 
         if (entity == null) return null;
-        // Defaults to openid-connect
-        String clientProtocol = client.getProtocol() == null ? "openid-connect" : client.getProtocol();
         LOG.tracef("getClientScopes(%s, %s, %b)%s", realm, client, defaultScopes, getShortStackTrace());
         return entity.getClientScopes(defaultScopes)
                 .map(clientScopeId -> session.clientScopes().getClientScopeById(realm, clientScopeId))
                 .filter(Objects::nonNull)
-                .filter(clientScope -> Objects.equals(clientScope.getProtocol(), clientProtocol))
+                .filter(clientScope -> acceptsClientScope(client, clientScope))
                 .collect(Collectors.toMap(ClientScopeModel::getName, Function.identity()));
     }
 
